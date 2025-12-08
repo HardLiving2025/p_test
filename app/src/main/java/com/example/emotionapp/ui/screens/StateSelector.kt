@@ -37,7 +37,7 @@ fun StateSelector(onNext: () -> Unit) {
         // 제목
         Text(
             text = "오늘 상태는 어떠세요?",
-            fontSize = 22.sp,
+            fontSize = FontSizes.Title,
             color = PrimaryBrown           // #3C2F2F
         )
 
@@ -64,7 +64,7 @@ fun StateSelector(onNext: () -> Unit) {
                 ) {
                     Text(
                         text = label,
-                        fontSize = 20.sp,
+                        fontSize = FontSizes.SemiBold,
                         color = PrimaryBrown       // #3C2F2F
                     )
                 }
@@ -80,12 +80,13 @@ fun StateSelector(onNext: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = PrimaryBrown,          // 활성
-                disabledContainerColor = SecondaryBeige // 비활성 (#D2BDA8)
+                disabledContainerColor = DisabledGray // 비활성 
             )
         ) {
             Text(
                 text = "확인 →",
-                color = SurfaceWhite
+                color = SurfaceWhite,
+                fontSize = FontSizes.Normal
             )
         }
     }

@@ -37,7 +37,7 @@ fun MoodSelector(onNext: () -> Unit) {
 
         Text(
             text = "오늘 기분은 어떠세요?",
-            fontSize = 22.sp,
+            fontSize = FontSizes.Title,
             color = PrimaryBrown
         )
 
@@ -73,12 +73,13 @@ fun MoodSelector(onNext: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = PrimaryBrown,     // 버튼 배경
-                disabledContainerColor = SecondaryBeige // 비활성화 버튼 색 (#D2BDA8)
+                disabledContainerColor = DisabledGray // 비활성화 버튼 색
             )
         ) {
             Text(
                 text = "확인 →",
-                color = SurfaceWhite
+                color = SurfaceWhite,
+                fontSize = FontSizes.Normal
             )
         }
     }

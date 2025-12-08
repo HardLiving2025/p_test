@@ -30,7 +30,7 @@ fun DailyInsightPopup(onClose: () -> Unit) {
         ) {
             Text(
                 text = "어제 행동 패턴 분석",
-                fontSize = 18.sp,
+                fontSize = FontSizes.SemiBold,
                 color = PrimaryBrown
             )
 
@@ -38,7 +38,7 @@ fun DailyInsightPopup(onClose: () -> Unit) {
 
             Text(
                 text = "최근 3번 연속 경고를 무시하셨어요. 지금은 충동성이 약간 높은 시기로 분석됩니다.",
-                fontSize = 14.sp,
+                fontSize = FontSizes.Normal,
                 color = PrimaryBrown
             )
 
@@ -55,7 +55,7 @@ fun DailyInsightPopup(onClose: () -> Unit) {
                 Text(
                     text = "확인",
                     color = SurfaceWhite,
-                    fontSize = 15.sp
+                    fontSize = FontSizes.Normal
                 )
             }
         }

@@ -28,11 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.emotionapp.ui.components.AnalysisTab
 import com.example.emotionapp.ui.components.DailyInsightPopup
-import com.example.emotionapp.ui.components.NotificationTab
-import com.example.emotionapp.ui.components.PredictionTab
-import com.example.emotionapp.ui.components.SettingsTab
 import com.example.emotionapp.ui.theme.*
 
 /** 탭 종류 */
@@ -153,7 +149,7 @@ private fun PeriodSelector(
                     Text(
                         text = label,
                         color = PrimaryBrown,
-                        fontSize = 14.sp
+                        fontSize = FontSizes.Normal,
                     )
                 }
             }
@@ -197,7 +193,7 @@ private fun BottomTabBar(
                     )
                     Text(
                         text = tab.label,
-                        fontSize = 11.sp,
+                        fontSize = FontSizes.Small,
                         color = if (isActive) AccentBlue else SurfaceWhite
                     )
                 }
