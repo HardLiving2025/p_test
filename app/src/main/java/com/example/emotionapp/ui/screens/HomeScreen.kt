@@ -63,13 +63,16 @@ fun HomeScreen() {
 
     val showPeriodSelector = activeTab != HomeTab.SETTINGS
 
+    val currentTab = activeTab
+    val onTabSelected: (HomeTab) -> Unit = { activeTab = it }
+
     Scaffold(
         containerColor = BackgroundBeige,
         bottomBar = {
             BottomTabBar(
                 tabs = tabs,
-                activeTab = activeTab,
-                onTabSelected = { activeTab = it }
+                activeTab = currentTab,
+                onTabSelected = onTabSelected
             )
         }
     ) { innerPadding ->
