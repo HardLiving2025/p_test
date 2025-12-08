@@ -1,4 +1,10 @@
 package com.example.emotionapp.ui.components
 
-class NotificationTab {
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import com.example.emotionapp.ui.screens.Period
+
+@Composable
+fun NotificationTab(period: Period) {
+    Text(text = "NotificationTab")
 }

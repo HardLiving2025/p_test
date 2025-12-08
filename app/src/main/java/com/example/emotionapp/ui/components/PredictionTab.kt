@@ -1,4 +1,10 @@
 package com.example.emotionapp.ui.components
 
-class PredictionTab {
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import com.example.emotionapp.ui.screens.Period
+
+@Composable
+fun PredictionTab(period: Period) {
+    Text(text = "PredictionTab")
 }
