@@ -7,26 +7,33 @@
  */
 package com.example.emotionapp.ui.screens
 
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.emotionapp.data.readWeeklyUsageJsonFromFile
+import com.example.emotionapp.data.saveWeeklyUsageJsonToFile
 import com.example.emotionapp.ui.components.analysis.EmotionUsageSection
-import com.example.emotionapp.ui.components.analysis.TimeUsageSection
+import com.example.emotionapp.ui.components.analysis.KeyPatternsSection
 import com.example.emotionapp.ui.components.analysis.MoodStateUsageSection
 import com.example.emotionapp.ui.components.analysis.RiskCombinationSection
-import com.example.emotionapp.ui.components.analysis.KeyPatternsSection
+import com.example.emotionapp.ui.components.analysis.TimeUsageSection
+import com.example.emotionapp.ui.theme.FontSizes
 import com.example.emotionapp.ui.theme.PrimaryBrown
 import com.example.emotionapp.ui.theme.SurfaceWhite
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.emotionapp.ui.theme.FontSizes
 
 @Composable
 fun AnalysisTab(period: Period) {
+    val context = LocalContext.current
     var showDetail by remember { mutableStateOf(false) }
 
     Column(
@@ -58,8 +65,34 @@ fun AnalysisTab(period: Period) {
         RiskCombinationSection()
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 주요 패턴
+        // 주요 패턴(인사이트)
         KeyPatternsSection()
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 📌 JSON 저장 + 로그 출력 버튼
+        Button(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            onClick = {
+                // 1) JSON 파일 저장
+                saveWeeklyUsageJsonToFile(context)
+
+                // 2) 다시 읽어서 내용 확인
+                val json = readWeeklyUsageJsonFromFile(context)
+
+                // 3) Logcat에 출력
+                Log.d("UsageJSON", "Saved JSON: $json")
+
+                // 4) 사용자에게 토스트 메시지
+                Toast.makeText(
+                    context,
+                    "일주일 사용 기록을 저장했어요. (Logcat에서 UsageJSON 태그 확인)",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        ) {
+            Text("일주일 사용 기록 저장")
+        }
     }
 }
 

@@ -31,7 +31,7 @@ fun MoodStateUsageSection() {
         modifier = Modifier
             .fillMaxWidth()
             .background(SurfaceWhite, RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .padding(Spacing.CardInner)
     ) {
         Text(
             text = "감정/상황별 총 사용량 (분)",
@@ -40,9 +40,9 @@ fun MoodStateUsageSection() {
             color = PrimaryBrown
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.M))
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.S)) {
             moodStateData.forEach { m ->
                 val total = m.busy + m.relaxed
                 val ratio = total.toFloat() / maxTotal.coerceAtLeast(1)
@@ -53,7 +53,7 @@ fun MoodStateUsageSection() {
                         fontSize = FontSizes.Normal,
                         color = PrimaryBrown
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XS))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

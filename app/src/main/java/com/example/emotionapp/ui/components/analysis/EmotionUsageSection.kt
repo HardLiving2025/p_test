@@ -63,7 +63,7 @@ fun EmotionUsageSection(
         modifier = Modifier
             .fillMaxWidth()
             .background(SurfaceWhite, RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .padding(Spacing.CardInner)
     ) {
         Text(
             text = "감정별 평균 사용량 (분)",
@@ -72,10 +72,10 @@ fun EmotionUsageSection(
             color = PrimaryBrown
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.M))
 
         // 감정별 바 그래프
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.M)) {
             moodData.forEach { item ->
                 val total = item.sns + item.other + item.game
                 val ratio = total.toFloat() / maxMoodTotal.coerceAtLeast(1)
@@ -86,7 +86,7 @@ fun EmotionUsageSection(
                         fontSize = 14.sp,
                         color = PrimaryBrown
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XS))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -118,7 +118,7 @@ fun EmotionUsageSection(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
                         text = "SNS ${item.sns}분 · 기타 ${item.other}분 · 게임 ${item.game}분",
                         fontSize = 12.sp,
@@ -128,7 +128,7 @@ fun EmotionUsageSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.M))
 
         Button(
             onClick = onToggleDetail,
@@ -143,7 +143,7 @@ fun EmotionUsageSection(
         }
 
         if (showDetail) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.SectionGap))
 
             Text(
                 text = "앱별 감정 비율 (Top 5)",
@@ -152,9 +152,9 @@ fun EmotionUsageSection(
                 color = PrimaryBrown
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.M))
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.M)) {
                 appDetailData.forEach { app ->
                     val percentage = (app.total.toFloat() / totalUsage.coerceAtLeast(1) * 100f)
                     val goodPercent = app.good.toFloat() / app.total * 100f
@@ -163,7 +163,7 @@ fun EmotionUsageSection(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.ItemGap)
                     ) {
                         // 아이콘
                         Box(
@@ -185,7 +185,7 @@ fun EmotionUsageSection(
                                 fontSize = 14.sp,
                                 color = PrimaryBrown
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XS))
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -238,7 +238,7 @@ fun EmotionUsageSection(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.SectionGap))
 
             // 범례
             Row(
@@ -257,7 +257,7 @@ fun EmotionUsageSection(
 private fun LegendDot(color: Color, label: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(Spacing.XS)
     ) {
         Box(
             modifier = Modifier

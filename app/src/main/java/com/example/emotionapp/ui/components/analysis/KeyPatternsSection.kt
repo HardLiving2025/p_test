@@ -17,7 +17,7 @@ fun KeyPatternsSection() {
         modifier = Modifier
             .fillMaxWidth()
             .background(SurfaceWhite, RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .padding(Spacing.CardInner)
     ) {
         Text(
             text = "주요 패턴",
@@ -26,14 +26,14 @@ fun KeyPatternsSection() {
             color = PrimaryBrown
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.M))
 
         InsightBlock(
             chipText = "기분이 좋지 않을 때 기타 앱 ↑",
             body = "기분이 좋지 않은 날에는 릴스와 같은 숏폼 콘텐츠 사용량이 평균보다 42% 증가했습니다."
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Spacing.S))
 
         InsightBlock(
             chipText = "20-24시 집중 사용",
@@ -51,12 +51,12 @@ private fun InsightBlock(
         modifier = Modifier
             .fillMaxWidth()
             .background(BackgroundBeige, RoundedCornerShape(12.dp))
-            .padding(12.dp)
+            .padding(Spacing.M)
     ) {
         Box(
             modifier = Modifier
                 .background(AccentBlue, RoundedCornerShape(999.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = Spacing.S, vertical = Spacing.XS)
         ) {
             Text(
                 text = chipText,
@@ -64,7 +64,7 @@ private fun InsightBlock(
                 color = PrimaryBrown
             )
         }
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.S))
         Text(
             text = body,
             fontSize = FontSizes.Normal,

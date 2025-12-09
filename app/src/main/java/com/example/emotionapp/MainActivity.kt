@@ -6,15 +6,19 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import com.example.emotionapp.navigation.AppNav
+import com.example.emotionapp.ui.components.common.UsagePermissionGate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme {            // 기본 M3 테마
+            MaterialTheme {
                 Surface {
-                    AppNav()          // 우리가 만든 네비게이션 시작
+                    // ✅ 여기서 권한 체크 + 설정 화면 이동 처리
+                    UsagePermissionGate {
+                        AppNav()   // 원래 앱 네비게이션
+                    }
                 }
             }
         }

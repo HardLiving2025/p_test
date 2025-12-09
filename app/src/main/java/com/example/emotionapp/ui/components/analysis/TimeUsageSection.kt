@@ -36,7 +36,7 @@ fun TimeUsageSection() {
         modifier = Modifier
             .fillMaxWidth()
             .background(SurfaceWhite, RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .padding(Spacing.CardInner)
     ) {
         Text(
             text = "시간대별 평균 사용량 (분)",
@@ -45,16 +45,16 @@ fun TimeUsageSection() {
             color = PrimaryBrown
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.M))
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.S)) {
             timeData.forEach { t ->
                 val total = t.sns + t.other + t.game
                 val ratio = total.toFloat() / maxTotal.coerceAtLeast(1)
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.S)
                 ) {
                     Text(
                         text = t.timeLabel,
