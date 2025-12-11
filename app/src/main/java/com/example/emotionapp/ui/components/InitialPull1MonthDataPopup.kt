@@ -61,7 +61,7 @@ fun InitialPull1MonthDataPopup(onClose: () -> Unit) {
                         }
 
                         // 5) 사용자에게 토스트 메시지
-                        Toast.makeText(context, "한 달 사용 기록을 저장하고 서버로 전송합니다.", Toast.LENGTH_SHORT)
+                        Toast.makeText(context, "10일 사용 기록을 저장하고 서버로 전송합니다.", Toast.LENGTH_SHORT)
                                 .show()
 
                         // 6) 팝업 닫기
@@ -69,7 +69,7 @@ fun InitialPull1MonthDataPopup(onClose: () -> Unit) {
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp)
-            ) { Text(text = "한 달 사용 기록 저장", fontSize = FontSizes.Normal) }
+            ) { Text(text = "10일 사용 기록 저장", fontSize = FontSizes.Normal) }
         }
     }
 }

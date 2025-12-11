@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.emotionapp.ui.components.analysis.EmotionUsageSection
@@ -37,7 +36,7 @@ fun AnalysisTab(period: Period) {
         Spacer(modifier = Modifier.height(12.dp))
 
         // 시간대별 평균 사용량
-        TimeUsageSection()
+        TimeUsageSection(period = period)
         Spacer(modifier = Modifier.height(12.dp))
 
         // 감정/상황별 총 사용량
@@ -50,7 +49,6 @@ fun AnalysisTab(period: Period) {
 
         // 주요 패턴(인사이트)
         KeyPatternsSection()
-
     }
 }
 
