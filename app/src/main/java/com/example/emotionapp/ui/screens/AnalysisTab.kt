@@ -24,7 +24,6 @@ import com.example.emotionapp.ui.theme.SurfaceWhite
 
 @Composable
 fun AnalysisTab(period: Period) {
-    val context = LocalContext.current
     var showDetail by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
