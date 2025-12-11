@@ -44,18 +44,32 @@ fun InitialPull1MonthDataPopup(onClose: () -> Unit) {
                         // 2) 다시 읽어서 내용 확인
                         val json = readWeeklyUsageJsonFromFile(context)
 
-                        // 3) Logcat에 출력
-                        Log.d("UsageJSON", "Saved JSON: $json")
+                        if (json != null) {
+                            // 3) Logcat에 출력
+                            Log.d("UsageJSON", "Saved JSON: $json")
 
-                        // 4) 사용자에게 토스트 메시지
-                        Toast.makeText(
-                                        context,
-                                        "한 달 사용 기록을 저장했어요.",
-                                        Toast.LENGTH_SHORT
-                                )
-                                .show()
+                            // 4) 서버로 전송
+                            com.example.emotionapp.data.ServerUploadManager.uploadJson(json) {
+                                    success,
+                                    message ->
+                                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                }
+                            }
 
-                        // 5) 팝업 닫기
+                            // 5) 사용자에게 토스트 메시지
+                            Toast.makeText(
+                                            context,
+                                            "한 달 사용 기록을 저장하고 서버로 전송합니다.",
+                                            Toast.LENGTH_SHORT
+                                    )
+                                    .show()
+                        } else {
+                            Log.e("UsageJSON", "Failed to read JSON")
+                            Toast.makeText(context, "데이터 저장에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        }
+
+                        // 6) 팝업 닫기
                         onClose()
                     },
                     modifier = Modifier.fillMaxWidth(),
