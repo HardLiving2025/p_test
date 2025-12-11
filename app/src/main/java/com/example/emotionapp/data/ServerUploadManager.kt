@@ -11,7 +11,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 
 object ServerUploadManager {
-    // TODO: 사용자가 제공한 서버 주소로 변경 필요. 현재는 이미지의 주소를 바탕으로 추정한 예시입니다.
     // 포트 번호: 65042
     // 경로: v0.7src/mobile
     private const val DAILY_SUMMARY_URL =
