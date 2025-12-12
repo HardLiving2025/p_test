@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.example.emotionapp.data.SlotUsageAverage
 import com.example.emotionapp.data.UsageAnalysisManager
 import com.example.emotionapp.data.UsageAverageResponse
@@ -40,7 +39,7 @@ fun TimeUsageSection(period: Period) {
         Column(
                 modifier =
                         Modifier.fillMaxWidth()
-                                .background(SurfaceWhite, RoundedCornerShape(16.dp))
+                                .background(SurfaceWhite, RoundedCornerShape(Spacing.L))
                                 .padding(Spacing.CardInner)
         ) {
                 Row(

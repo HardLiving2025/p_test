@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.example.emotionapp.data.readMonthlyUsageJsonFromFile
 import com.example.emotionapp.data.saveMonthlyUsageJsonToFile
 import com.example.emotionapp.ui.theme.*
@@ -29,8 +28,8 @@ fun InitialPull1MonthDataPopup(onClose: () -> Unit) {
         Column(
                 modifier =
                         Modifier.fillMaxWidth(0.85f)
-                                .background(SurfaceWhite, RoundedCornerShape(24.dp))
-                                .padding(20.dp)
+                                .background(SurfaceWhite, RoundedCornerShape(Spacing.XXL))
+                                .padding(Spacing.XL)
         ) {
             Text(text = "버튼을 눌러 정보를 불러와 보세요!", fontSize = FontSizes.SemiBold, color = PrimaryBrown)
 
@@ -68,7 +67,7 @@ fun InitialPull1MonthDataPopup(onClose: () -> Unit) {
                         onClose()
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(Spacing.L)
             ) { Text(text = "10일 사용 기록 저장", fontSize = FontSizes.Normal) }
         }
     }

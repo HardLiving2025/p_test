@@ -12,64 +12,64 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.emotionapp.ui.theme.*
 
-private data class MoodUsage(
-    val moodLabel: String,
-    val sns: Int,
-    val other: Int,
-    val game: Int
-)
+private data class MoodUsage(val moodLabel: String, val sns: Int, val other: Int, val game: Int)
 
 private data class AppDetail(
-    val appName: String,
-    val icon: String,
-    val total: Int,
-    val good: Int,
-    val normal: Int,
-    val bad: Int
+        val appName: String,
+        val icon: String,
+        val total: Int,
+        val good: Int,
+        val normal: Int,
+        val bad: Int
 )
 
 // React 코드의 #EDBE77
 private val HighlightOrange = Color(0xFFEDBE77)
 
 @Composable
-fun EmotionUsageSection(
-    showDetail: Boolean,
-    onToggleDetail: () -> Unit
-) {
+fun EmotionUsageSection(showDetail: Boolean, onToggleDetail: () -> Unit) {
     // 감정별 평균 사용량 데이터
-    val moodData = listOf(
-        MoodUsage("😊 좋음", sns = 45, other = 30, game = 25),
-        MoodUsage("🙂 보통", sns = 60, other = 50, game = 35),
-        MoodUsage("😞 나쁨", sns = 75, other = 95, game = 40)
-    )
+    val moodData =
+            listOf(
+                    MoodUsage("😊 좋음", sns = 45, other = 30, game = 25),
+                    MoodUsage("🙂 보통", sns = 60, other = 50, game = 35),
+                    MoodUsage("😞 나쁨", sns = 75, other = 95, game = 40)
+            )
 
     // 앱별 감정 상세 데이터
-    val appDetailData = listOf(
-        AppDetail("Naver Webtoon", "📚", total = 350, good = 80, normal = 120, bad = 150),
-        AppDetail("Instagram", "📷", total = 255, good = 50, normal = 80, bad = 125),
-        AppDetail("YouTube", "▶️", total = 180, good = 40, normal = 70, bad = 70),
-        AppDetail("TikTok", "🎵", total = 150, good = 30, normal = 50, bad = 70),
-        AppDetail("Twitter", "🐦", total = 120, good = 40, normal = 50, bad = 30)
-    )
+    val appDetailData =
+            listOf(
+                    AppDetail(
+                            "Naver Webtoon",
+                            "📚",
+                            total = 350,
+                            good = 80,
+                            normal = 120,
+                            bad = 150
+                    ),
+                    AppDetail("Instagram", "📷", total = 255, good = 50, normal = 80, bad = 125),
+                    AppDetail("YouTube", "▶️", total = 180, good = 40, normal = 70, bad = 70),
+                    AppDetail("TikTok", "🎵", total = 150, good = 30, normal = 50, bad = 70),
+                    AppDetail("Twitter", "🐦", total = 120, good = 40, normal = 50, bad = 30)
+            )
 
     val totalUsage = appDetailData.sumOf { it.total }
     val maxTotal = appDetailData.maxOf { it.total }
     val maxMoodTotal = moodData.maxOf { it.sns + it.other + it.game }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(SurfaceWhite, RoundedCornerShape(16.dp))
-            .padding(Spacing.CardInner)
+            modifier =
+                    Modifier.fillMaxWidth()
+                            .background(SurfaceWhite, RoundedCornerShape(Spacing.L))
+                            .padding(Spacing.CardInner)
     ) {
         Text(
-            text = "감정별 평균 사용량 (분)",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = PrimaryBrown
+                text = "감정별 평균 사용량 (분)",
+                fontSize = FontSizes.SemiBold,
+                fontWeight = FontWeight.SemiBold,
+                color = PrimaryBrown
         )
 
         Spacer(modifier = Modifier.height(Spacing.M))
@@ -81,48 +81,40 @@ fun EmotionUsageSection(
                 val ratio = total.toFloat() / maxMoodTotal.coerceAtLeast(1)
 
                 Column {
-                    Text(
-                        text = item.moodLabel,
-                        fontSize = 14.sp,
-                        color = PrimaryBrown
-                    )
+                    Text(text = item.moodLabel, fontSize = FontSizes.Normal, color = PrimaryBrown)
                     Spacer(modifier = Modifier.height(Spacing.XS))
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(10.dp)
-                            .background(BackgroundBeige, RoundedCornerShape(999.dp))
+                            modifier =
+                                    Modifier.fillMaxWidth()
+                                            .height(10.dp)
+                                            .background(BackgroundBeige, RoundedCornerShape(999.dp))
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(ratio)
-                                .fillMaxHeight()
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth(ratio).fillMaxHeight()) {
                             Box(
-                                modifier = Modifier
-                                    .weight(item.sns.toFloat())
-                                    .fillMaxHeight()
-                                    .background(PrimaryBrown)
+                                    modifier =
+                                            Modifier.weight(item.sns.toFloat())
+                                                    .fillMaxHeight()
+                                                    .background(PrimaryBrown)
                             )
                             Box(
-                                modifier = Modifier
-                                    .weight(item.other.toFloat())
-                                    .fillMaxHeight()
-                                    .background(SecondaryBeige)
+                                    modifier =
+                                            Modifier.weight(item.other.toFloat())
+                                                    .fillMaxHeight()
+                                                    .background(SecondaryBeige)
                             )
                             Box(
-                                modifier = Modifier
-                                    .weight(item.game.toFloat())
-                                    .fillMaxHeight()
-                                    .background(HighlightOrange)
+                                    modifier =
+                                            Modifier.weight(item.game.toFloat())
+                                                    .fillMaxHeight()
+                                                    .background(HighlightOrange)
                             )
                         }
                     }
                     Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
-                        text = "SNS ${item.sns}분 · 기타 ${item.other}분 · 게임 ${item.game}분",
-                        fontSize = 12.sp,
-                        color = PrimaryBrown.copy(alpha = 0.7f)
+                            text = "SNS ${item.sns}분 · 기타 ${item.other}분 · 게임 ${item.game}분",
+                            fontSize = FontSizes.Small,
+                            color = PrimaryBrown.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -131,25 +123,20 @@ fun EmotionUsageSection(
         Spacer(modifier = Modifier.height(Spacing.M))
 
         Button(
-            onClick = onToggleDetail,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBrown),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text(
-                text = if (showDetail) "닫기" else "상세 보기",
-                color = SurfaceWhite
-            )
-        }
+                onClick = onToggleDetail,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBrown),
+                shape = RoundedCornerShape(Spacing.L)
+        ) { Text(text = if (showDetail) "닫기" else "상세 보기", color = SurfaceWhite) }
 
         if (showDetail) {
             Spacer(modifier = Modifier.height(Spacing.SectionGap))
 
             Text(
-                text = "앱별 감정 비율 (Top 5)",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = PrimaryBrown
+                    text = "앱별 감정 비율 (Top 5)",
+                    fontSize = FontSizes.SemiBold,
+                    fontWeight = FontWeight.SemiBold,
+                    color = PrimaryBrown
             )
 
             Spacer(modifier = Modifier.height(Spacing.M))
@@ -162,58 +149,66 @@ fun EmotionUsageSection(
                     val badPercent = app.bad.toFloat() / app.total * 100f
 
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.ItemGap)
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.ItemGap)
                     ) {
                         // 아이콘
                         Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(BackgroundBeige, RoundedCornerShape(16.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = app.icon,
-                                fontSize = 22.sp
-                            )
-                        }
+                                modifier =
+                                        Modifier.size(48.dp)
+                                                .background(
+                                                        BackgroundBeige,
+                                                        RoundedCornerShape(Spacing.L)
+                                                ),
+                                contentAlignment = Alignment.Center
+                        ) { Text(text = app.icon, fontSize = FontSizes.SemiBold) }
 
                         // 이름 + 막대
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = app.appName,
-                                fontSize = 14.sp,
-                                color = PrimaryBrown
+                                    text = app.appName,
+                                    fontSize = FontSizes.Normal,
+                                    color = PrimaryBrown
                             )
                             Spacer(modifier = Modifier.height(Spacing.XS))
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(10.dp)
-                                    .background(BackgroundBeige, RoundedCornerShape(999.dp))
+                                    modifier =
+                                            Modifier.fillMaxWidth()
+                                                    .height(10.dp)
+                                                    .background(
+                                                            BackgroundBeige,
+                                                            RoundedCornerShape(999.dp)
+                                                    )
                             ) {
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth(app.total.toFloat() / maxTotal.coerceAtLeast(1))
-                                        .fillMaxHeight()
+                                        modifier =
+                                                Modifier.fillMaxWidth(
+                                                                app.total.toFloat() /
+                                                                        maxTotal.coerceAtLeast(1)
+                                                        )
+                                                        .fillMaxHeight()
                                 ) {
                                     Box(
-                                        modifier = Modifier
-                                            .weight(badPercent.coerceAtLeast(0.1f))
-                                            .fillMaxHeight()
-                                            .background(PrimaryBrown)
+                                            modifier =
+                                                    Modifier.weight(badPercent.coerceAtLeast(0.1f))
+                                                            .fillMaxHeight()
+                                                            .background(PrimaryBrown)
                                     )
                                     Box(
-                                        modifier = Modifier
-                                            .weight(normalPercent.coerceAtLeast(0.1f))
-                                            .fillMaxHeight()
-                                            .background(HighlightOrange)
+                                            modifier =
+                                                    Modifier.weight(
+                                                                    normalPercent.coerceAtLeast(
+                                                                            0.1f
+                                                                    )
+                                                            )
+                                                            .fillMaxHeight()
+                                                            .background(HighlightOrange)
                                     )
                                     Box(
-                                        modifier = Modifier
-                                            .weight(goodPercent.coerceAtLeast(0.1f))
-                                            .fillMaxHeight()
-                                            .background(SecondaryBeige)
+                                            modifier =
+                                                    Modifier.weight(goodPercent.coerceAtLeast(0.1f))
+                                                            .fillMaxHeight()
+                                                            .background(SecondaryBeige)
                                     )
                                 }
                             }
@@ -224,14 +219,14 @@ fun EmotionUsageSection(
                             val minutes = app.total / 60
                             val seconds = app.total % 60
                             Text(
-                                text = "${minutes}분 ${seconds}초",
-                                fontSize = 12.sp,
-                                color = PrimaryBrown
+                                    text = "${minutes}분 ${seconds}초",
+                                    fontSize = FontSizes.Small,
+                                    color = PrimaryBrown
                             )
                             Text(
-                                text = "${"%.1f".format(percentage)}%",
-                                fontSize = 12.sp,
-                                color = PrimaryBrown.copy(alpha = 0.6f)
+                                    text = "${"%.1f".format(percentage)}%",
+                                    fontSize = FontSizes.Small,
+                                    color = PrimaryBrown.copy(alpha = 0.6f)
                             )
                         }
                     }
@@ -242,8 +237,8 @@ fun EmotionUsageSection(
 
             // 범례
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 LegendDot(color = PrimaryBrown, label = "😞 나쁨")
                 LegendDot(color = HighlightOrange, label = "🙂 보통")
@@ -256,18 +251,10 @@ fun EmotionUsageSection(
 @Composable
 private fun LegendDot(color: Color, label: String) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.XS)
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.XS)
     ) {
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .background(color, RoundedCornerShape(50))
-        )
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = PrimaryBrown.copy(alpha = 0.8f)
-        )
+        Box(modifier = Modifier.size(10.dp).background(color, RoundedCornerShape(50)))
+        Text(text = label, fontSize = FontSizes.Small, color = PrimaryBrown.copy(alpha = 0.8f))
     }
 }
