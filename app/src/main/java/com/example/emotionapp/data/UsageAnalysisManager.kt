@@ -13,30 +13,29 @@ import org.json.JSONObject
 
 /** API 응답 데이터 모델 */
 data class SlotUsageAverage(
-    val slot: Int,
-    val startTime: String, // "00:00"
-    val endTime: String,   // "00:30"
-    val sns: Long,
-    val game: Long,
-    val other: Long,
-    val total: Long
+        val slot: Int,
+        val startTime: String, // "00:00"
+        val endTime: String, // "00:30"
+        val sns: Long,
+        val game: Long,
+        val other: Long,
+        val total: Long
 )
 
 data class UsageAverageResponse(
-    val yesterday: List<SlotUsageAverage>,
-    val week1: List<SlotUsageAverage>,
-    val week2: List<SlotUsageAverage>,
-    val month1: List<SlotUsageAverage>
+        val yesterday: List<SlotUsageAverage>,
+        val week1: List<SlotUsageAverage>,
+        val week2: List<SlotUsageAverage>,
+        val month1: List<SlotUsageAverage>
 )
 
 object UsageAnalysisManager {
     // API URL
-    private const val URL =
-        "http://ceprj2.gachon.ac.kr:65042/api/analysis/usage-by-slot-average"
+    private const val URL = "http://ceprj2.gachon.ac.kr:65042/api/analysis/usage-by-slot-average"
 
     // JWT 토큰 (ServerUploadManager와 동일)
     private const val AUTH_TOKEN =
-        "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMSIsICJleHAiOiAxNzY2MDQ4OTA0fQ.nuMeRx09mGAVuMICqXfYcH1MwFixpEenVZDNXb_36rA"
+            "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMSIsICJleHAiOiAxNzY2MDQ4OTA0fQ.nuMeRx09mGAVuMICqXfYcH1MwFixpEenVZDNXb_36rA"
 
     private val client = OkHttpClient()
 
@@ -46,77 +45,79 @@ object UsageAnalysisManager {
      */
     fun fetchUsageAverages(onResult: (UsageAverageResponse?) -> Unit) {
         val request =
-            Request.Builder()
-                .url(URL)
-                .addHeader("Authorization", "Bearer $AUTH_TOKEN")
-                .get()
-                .build()
+                Request.Builder()
+                        .url(URL)
+                        .addHeader("Authorization", "Bearer $AUTH_TOKEN")
+                        .get()
+                        .build()
 
         client.newCall(request)
-            .enqueue(
-                object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.e("UsageAnalysis", "❌ Failed to fetch usage averages", e)
-                        postResult(onResult, null)
-                    }
-
-                    override fun onResponse(call: Call, response: Response) {
-                        response.use {
-                            if (!response.isSuccessful) {
-                                Log.e(
-                                    "UsageAnalysis",
-                                    "❌ Server error: ${response.code} ${response.message}"
-                                )
+                .enqueue(
+                        object : Callback {
+                            override fun onFailure(call: Call, e: IOException) {
+                                Log.e("UsageAnalysis", "❌ Failed to fetch usage averages", e)
                                 postResult(onResult, null)
-                                return
                             }
 
-                            val body = response.body?.string()
-                            if (body == null) {
-                                Log.e("UsageAnalysis", "❌ Response body is null")
-                                postResult(onResult, null)
-                                return
-                            }
+                            override fun onResponse(call: Call, response: Response) {
+                                response.use {
+                                    if (!response.isSuccessful) {
+                                        Log.e(
+                                                "UsageAnalysis",
+                                                "❌ Server error: ${response.code} ${response.message}"
+                                        )
+                                        postResult(onResult, null)
+                                        return
+                                    }
 
-                            // ✅ 원본 JSON 로그
-                            Log.d("UsageAnalysis", "✅ Raw response body:\n$body")
+                                    val body = response.body?.string()
+                                    if (body == null) {
+                                        Log.e("UsageAnalysis", "❌ Response body is null")
+                                        postResult(onResult, null)
+                                        return
+                                    }
 
-                            try {
-                                val json = JSONObject(body)
-                                val result =
-                                    UsageAverageResponse(
-                                        yesterday =
-                                            parseSlots(
-                                                json.optJSONArray("yesterday")
-                                            ),
-                                        week1 =
-                                            parseSlots(
-                                                json.optJSONArray("week_1")
-                                            ),
-                                        week2 =
-                                            parseSlots(
-                                                json.optJSONArray("week_2")
-                                            ),
-                                        month1 =
-                                            parseSlots(
-                                                json.optJSONArray("month_1")
-                                            )
-                                    )
+                                    // ✅ 원본 JSON 로그
+                                    Log.d("UsageAnalysis", "✅ Raw response body:\n$body")
 
-                                Log.d("UsageAnalysis", "✅ Successfully parsed data")
+                                    try {
+                                        val json = JSONObject(body)
+                                        val result =
+                                                UsageAverageResponse(
+                                                        yesterday =
+                                                                parseSlots(
+                                                                        json.optJSONArray(
+                                                                                "yesterday"
+                                                                        )
+                                                                ),
+                                                        week1 =
+                                                                parseSlots(
+                                                                        json.optJSONArray("week_1")
+                                                                ),
+                                                        week2 =
+                                                                parseSlots(
+                                                                        json.optJSONArray("week_2")
+                                                                ),
+                                                        month1 =
+                                                                parseSlots(
+                                                                        json.optJSONArray("month_1")
+                                                                )
+                                                )
 
-                                // ✅ 파싱된 데이터 상세 로그 출력
-                                logUsageAverages("ServerResponse", result)
+                                        Log.d("UsageAnalysis", "✅ Successfully parsed data")
 
-                                postResult(onResult, result)
-                            } catch (e: Exception) {
-                                Log.e("UsageAnalysis", "❌ Parsing error", e)
-                                postResult(onResult, null)
+                                        // ✅ 파싱된 데이터 상세 로그 출력
+                                        logUsageAverages("ServerResponse", result)
+
+                                        postResult(onResult, result)
+                                    } catch (e: Exception) {
+                                        Log.e("UsageAnalysis", "❌ Parsing error", e)
+                                        postResult(onResult, null)
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-            )
+                )
     }
 
     /** 메인 스레드로 콜백 전달 */
@@ -131,16 +132,29 @@ object UsageAnalysisManager {
 
         for (i in 0 until array.length()) {
             val obj = array.getJSONObject(i)
+            val slot = obj.optInt("slot")
+
+            // startTime/endTime을 slot 기반으로 계산하여 "nu" 문제 방지
+            val startTotalMin = slot * 30
+            val startH = startTotalMin / 60
+            val startM = startTotalMin % 60
+            val startTimeStr = "%02d:%02d".format(startH, startM)
+
+            val endTotalMin = startTotalMin + 30
+            val endH = endTotalMin / 60
+            val endM = endTotalMin % 60
+            val endTimeStr = "%02d:%02d".format(endH, endM)
+
             list.add(
-                SlotUsageAverage(
-                    slot = obj.optInt("slot"),
-                    startTime = obj.optString("start_time"),
-                    endTime = obj.optString("end_time"),
-                    sns = obj.optLong("sns"),
-                    game = obj.optLong("game"),
-                    other = obj.optLong("other"),
-                    total = obj.optLong("total")
-                )
+                    SlotUsageAverage(
+                            slot = slot,
+                            startTime = startTimeStr,
+                            endTime = endTimeStr,
+                            sns = obj.optLong("sns"),
+                            game = obj.optLong("game"),
+                            other = obj.optLong("other"),
+                            total = obj.optLong("total")
+                    )
             )
         }
         // 슬롯 순서대로 정렬
@@ -161,9 +175,9 @@ object UsageAnalysisManager {
 
             list.forEach { slot ->
                 Log.d(
-                    "UsageAnalysis",
-                    "slot=${slot.slot}, ${slot.startTime}~${slot.endTime}, " +
-                            "sns=${slot.sns}, game=${slot.game}, other=${slot.other}, total=${slot.total}"
+                        "UsageAnalysis",
+                        "slot=${slot.slot}, ${slot.startTime}~${slot.endTime}, " +
+                                "sns=${slot.sns}, game=${slot.game}, other=${slot.other}, total=${slot.total}"
                 )
             }
         }
