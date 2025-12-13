@@ -401,7 +401,10 @@ private fun BarItem(value: Int, max: Int = 100, color: Color) {
                 modifier =
                         Modifier.width(18.dp) // 막대 너비
                                 .fillMaxHeight(fraction = (value.toFloat() / max).coerceIn(0f, 1f))
-                                .background(color)
+                                .background(
+                                        color,
+                                        RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                                )
         )
 }
 
