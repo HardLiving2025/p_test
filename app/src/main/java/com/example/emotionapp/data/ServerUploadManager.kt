@@ -18,11 +18,23 @@ object ServerUploadManager {
     private const val BATCH_URL = "http://ceprj2.gachon.ac.kr:65042/api/usage/batch"
 
     // ✅ JWT 토큰
-    private const val AUTH_TOKEN =
-            "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMSIsICJleHAiOiAxNzY2MDQ4OTA0fQ.nuMeRx09mGAVuMICqXfYcH1MwFixpEenVZDNXb_36rA"
+    private val AUTH_TOKEN = TokenManager.AUTH_TOKEN
 
     private val client = OkHttpClient()
     private val JSON_MEDIA_type = "application/json; charset=utf-8".toMediaType()
+    private const val MOOD_URL = "http://ceprj2.gachon.ac.kr:65042/api/moods"
+
+    fun uploadMoodState(emotion: String, status: String, onResult: (Boolean) -> Unit) {
+        val jsonString =
+                """
+            {
+                "emotion": "$emotion",
+                "status": "$status"
+            }
+        """.trimIndent()
+
+        uploadToUrl(MOOD_URL, jsonString) { success, _ -> onResult(success) }
+    }
 
     fun uploadJson(jsonString: String, onResult: (Boolean, String) -> Unit) {
         // 1. Daily Summary 업로드

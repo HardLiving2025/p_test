@@ -22,7 +22,7 @@ import com.example.emotionapp.ui.theme.PrimaryBrown
 import com.example.emotionapp.ui.theme.SurfaceWhite
 
 @Composable
-fun AnalysisTab(period: Period) {
+fun AnalysisTab(period: Period, refreshTrigger: Int = 0) {
     var showDetail by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -36,7 +36,7 @@ fun AnalysisTab(period: Period) {
         Spacer(modifier = Modifier.height(12.dp))
 
         // 시간대별 평균 사용량
-        TimeUsageSection(period = period)
+        TimeUsageSection(period = period, refreshTrigger = refreshTrigger)
         Spacer(modifier = Modifier.height(12.dp))
 
         // 감정/상황별 총 사용량

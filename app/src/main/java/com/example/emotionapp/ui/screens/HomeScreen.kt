@@ -68,6 +68,9 @@ fun HomeScreen() {
 
     val showPeriodSelector = activeTab != HomeTab.SETTINGS
 
+    // 데이터 리프레시 트리거 (버전)
+    var refreshTrigger by remember { mutableStateOf(0) }
+
     val currentTab = activeTab
     val onTabSelected: (HomeTab) -> Unit = { activeTab = it }
 
@@ -95,7 +98,11 @@ fun HomeScreen() {
                                         .padding(bottom = 16.dp)
                 ) {
                     when (activeTab) {
-                        HomeTab.ANALYSIS -> AnalysisTab(period = selectedPeriod)
+                        HomeTab.ANALYSIS ->
+                                AnalysisTab(
+                                        period = selectedPeriod,
+                                        refreshTrigger = refreshTrigger
+                                )
                         HomeTab.PREDICTION -> PredictionTab(period = selectedPeriod)
                         HomeTab.NOTIFICATION -> NotificationTab(period = selectedPeriod)
                         HomeTab.SETTINGS -> SettingsTab()
@@ -109,7 +116,8 @@ fun HomeScreen() {
                         onClose = {
                             showInitialPopup = false
                             showInsightPopup = true
-                        }
+                        },
+                        onRefreshNeeded = { refreshTrigger++ }
                 )
             } else if (showInsightPopup) {
                 DailyInsightPopup(onClose = { showInsightPopup = false })

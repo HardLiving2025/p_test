@@ -17,7 +17,7 @@ import com.example.emotionapp.data.saveMonthlyUsageJsonToFile
 import com.example.emotionapp.ui.theme.*
 
 @Composable
-fun InitialPull1MonthDataPopup(onClose: () -> Unit) {
+fun InitialPull1MonthDataPopup(onClose: () -> Unit, onRefreshNeeded: () -> Unit) {
     val context = LocalContext.current
 
     Box(
@@ -53,6 +53,9 @@ fun InitialPull1MonthDataPopup(onClose: () -> Unit) {
                                     message ->
                                 android.os.Handler(android.os.Looper.getMainLooper()).post {
                                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                    if (success) {
+                                        onRefreshNeeded()
+                                    }
                                 }
                             }
                         } else {

@@ -16,11 +16,11 @@ import com.example.emotionapp.ui.screens.Period
 import com.example.emotionapp.ui.theme.*
 
 @Composable
-fun TimeUsageSection(period: Period) {
+fun TimeUsageSection(period: Period, refreshTrigger: Int = 0) {
         var usageResponse by remember { mutableStateOf<UsageAverageResponse?>(null) }
 
         // 데이터 로드
-        LaunchedEffect(Unit) {
+        LaunchedEffect(Unit, refreshTrigger) {
                 UsageAnalysisManager.fetchUsageAverages { response -> usageResponse = response }
         }
 

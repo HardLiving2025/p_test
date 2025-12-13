@@ -12,20 +12,18 @@ import com.example.emotionapp.ui.screens.StateSelector
 fun AppNav() {
     val navController = rememberNavController()
 
-    NavHost(
-        navController = navController,
-        startDestination = "mood"
-    ) {
+    NavHost(navController = navController, startDestination = "mood") {
         composable("mood") {
-            MoodSelector(onNext = { navController.navigate("state") })
+            MoodSelector(onNext = { mood -> navController.navigate("state/$mood") })
         }
 
-        composable("state") {
-            StateSelector(onNext = { navController.navigate("home") })
+        composable(
+                route = "state/{mood}",
+        ) { backStackEntry ->
+            val mood = backStackEntry.arguments?.getString("mood") ?: "normal"
+            StateSelector(mood = mood, onNext = { navController.navigate("home") })
         }
 
-        composable("home") {
-            HomeScreen()
-        }
+        composable("home") { HomeScreen() }
     }
 }
