@@ -46,7 +46,7 @@ fun StateSelector(onNext: () -> Unit) {
                 Box(
                         modifier =
                                 Modifier.width(140.dp)
-                                        .height(80.dp) // size(width, height) → 오류 나는 부분 수정
+                                        .height(80.dp)
                                         .background(SurfaceWhite, RoundedCornerShape(20.dp))
                                         .border(
                                                 width = 4.dp,
