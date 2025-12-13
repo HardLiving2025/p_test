@@ -199,7 +199,6 @@ fun TimeUsageLineChart(data: List<SlotUsageAverage>) {
                                         color = color,
                                         style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
                                 )
-
                                 // 포인트 (외곽색 + 흰색)
                                 points.forEach { point ->
                                         drawCircle(
