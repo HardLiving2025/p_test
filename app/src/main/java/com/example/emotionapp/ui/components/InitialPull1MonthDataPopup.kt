@@ -48,9 +48,10 @@ fun InitialPull1MonthDataPopup(onClose: () -> Unit, onRefreshNeeded: () -> Unit)
                             Log.d("UsageJSON", "Saved JSON: $json")
 
                             // 4) 서버로 전송
-                            com.example.emotionapp.data.ServerUploadManager.uploadJson(json!!) {
-                                    success,
-                                    message ->
+                            com.example.emotionapp.data.ServerUploadManager.uploadJson(
+                                    context,
+                                    json!!
+                            ) { success, message ->
                                 android.os.Handler(android.os.Looper.getMainLooper()).post {
                                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                                     if (success) {

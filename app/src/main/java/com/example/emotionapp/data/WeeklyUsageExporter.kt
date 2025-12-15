@@ -235,12 +235,18 @@ private fun analysisToJson(analysis: WeeklyUsageAnalysis): String {
         obj.put("usage_date", slot.date)
         obj.put("time_slot", slot.timeSlot)
 
+        // 랜덤 감정/상태 추가
+        val emotions = listOf("GOOD", "NORMAL", "BAD")
+        val statuses = listOf("BUSY", "FREE")
+        obj.put("emotion", emotions.random())
+        obj.put("status", statuses.random())
+
         val usageObj = JSONObject()
         slot.categoryUsage.entries.sortedByDescending { it.value }.forEach { (appName, duration) ->
             usageObj.put(appName, duration)
         }
 
-        obj.put("package", usageObj)
+        obj.put("package_data", usageObj)
         slotsArray.put(obj)
     }
 

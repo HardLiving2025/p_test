@@ -5,31 +5,57 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.emotionapp.ui.theme.*
-
-private data class MoodStateUsage(val moodLabel: String, val busy: Int, val relaxed: Int)
 
 @Composable
 fun MoodStateUsageSection() {
-        val moodStateData =
+        val context = androidx.compose.ui.platform.LocalContext.current
+        // 감정: GOOD, NORMAL, BAD -> 총 사용량(분) 매핑
+        var moodData by remember { mutableStateOf<Map<String, Long>?>(null) } // "GOOD" -> 120L
+
+        LaunchedEffect(Unit) {
+                com.example.emotionapp.data.UsageAnalysisManager.fetchUsageByEmotionAverage(
+                        context
+                ) { result ->
+                        if (result != null) {
+                                // result: "GOOD" -> {"SNS": 10, ...}
+                                // 총합 계산
+                                val calculated = mutableMapOf<String, Long>()
+                                result.forEach { (emotion, cats) ->
+                                        val totalMs = cats.values.sum()
+                                        calculated[emotion] = totalMs / (1000 * 60) // ms -> min
+                                }
+                                moodData = calculated
+                        }
+                }
+        }
+
+        val chartData =
                 listOf(
-                        MoodStateUsage("😊 좋음", busy = 45, relaxed = 55),
-                        MoodStateUsage("🙂 보통", busy = 60, relaxed = 40),
-                        MoodStateUsage("😞 나쁨", busy = 30, relaxed = 70)
+                        "좋음" to (moodData?.get("GOOD") ?: 0L),
+                        "보통" to (moodData?.get("NORMAL") ?: 0L),
+                        "나쁨" to (moodData?.get("BAD") ?: 0L)
                 )
 
-        // 최대값 계산 (Y축 스케일링용)
-        // 데이터 합인 100을 기준으로 할 수도 있고, 실제 데이터의 최대값을 기준으로 할 수도 있음.
-        // EmotionUsageSection과 통일성을 위해 100을 기준으로 하거나,
-        // 여기서는 busy/relaxed 합이 100이라고 가정하면 100 스케일이 적절함.
-        val yAxisMax = 100
+        // 최대값 (Y축) - 데이터가 없으면 기본 100
+        // maxOfOrNull ambiguity 해결을 위해 compareBy를 쓰거나 map 사용
+        val maxVal = chartData.maxOfOrNull { it.second } ?: 100L
+        if (maxVal < 100L) {
+                // 최소 100
+        }
+        val finalMax = maxVal.coerceAtLeast(100L)
+
+        // Y축 눈금 (5등분)
+        val step = finalMax / 4
 
         Column(
                 modifier =
@@ -38,7 +64,7 @@ fun MoodStateUsageSection() {
                                 .padding(Spacing.CardInner)
         ) {
                 Text(
-                        text = "감정/상황별 총 사용량 (분)",
+                        text = "감정별 평균 총 사용량 (분)",
                         fontSize = FontSizes.SemiBold,
                         fontWeight = FontWeight.SemiBold,
                         color = PrimaryBrown
@@ -48,19 +74,19 @@ fun MoodStateUsageSection() {
 
                 // 감정별 막대 그래프 (Canvas + Layout)
                 Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-                        // Y축 레이블 (0 ~ 100)
+                        // Y축 레이블
                         Column(
                                 modifier = Modifier.fillMaxHeight(),
                                 verticalArrangement = Arrangement.SpaceBetween,
                                 horizontalAlignment = Alignment.End
                         ) {
-                                listOf("100", "75", "50", "25", "0").forEach { label ->
+                                (4 downTo 0).forEach { i ->
                                         Text(
-                                                text = label,
+                                                text = "${step * i}",
                                                 fontSize = FontSizes.Small,
                                                 color = PrimaryBrown.copy(alpha = 0.7f),
                                                 textAlign = TextAlign.End,
-                                                modifier = Modifier.width(24.dp)
+                                                modifier = Modifier.width(32.dp)
                                         )
                                 }
                         }
@@ -107,31 +133,51 @@ fun MoodStateUsageSection() {
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.Bottom
                                 ) {
-                                        moodStateData.forEach { item ->
+                                        chartData.forEach { (label, value) ->
+                                                // 색상 매핑
+                                                val barColor =
+                                                        when (label) {
+                                                                "좋음" -> Color(0xFFD4E157) // 연두색 계열
+                                                                "보통" -> Color(0xFFFFCC80) // 주황색 계열
+                                                                "나쁨" -> Color(0xFFEF9A9A) // 빨간색 계열
+                                                                else -> SecondaryBeige
+                                                        }
+
                                                 Box(
                                                         modifier =
                                                                 Modifier.weight(1f).fillMaxHeight(),
                                                         contentAlignment = Alignment.BottomCenter
                                                 ) {
-                                                        // 막대 그룹
-                                                        Row(
-                                                                verticalAlignment =
-                                                                        Alignment.Bottom,
-                                                                horizontalArrangement =
-                                                                        Arrangement.spacedBy(4.dp),
-                                                                modifier = Modifier.fillMaxHeight()
+                                                        Column(
+                                                                horizontalAlignment =
+                                                                        Alignment
+                                                                                .CenterHorizontally,
+                                                                verticalArrangement =
+                                                                        Arrangement.Bottom
                                                         ) {
-                                                                // 바쁨 (PrimaryBrown)
+                                                                // 값 텍스트 (막대 위)
+                                                                if (value > 0) {
+                                                                        Text(
+                                                                                text = "$value",
+                                                                                fontSize = 10.sp,
+                                                                                color =
+                                                                                        PrimaryBrown
+                                                                                                .copy(
+                                                                                                        alpha =
+                                                                                                                0.8f
+                                                                                                ),
+                                                                                modifier =
+                                                                                        Modifier.padding(
+                                                                                                bottom =
+                                                                                                        2.dp
+                                                                                        )
+                                                                        )
+                                                                }
+                                                                // 막대
                                                                 MoodBarItem(
-                                                                        value = item.busy,
-                                                                        max = yAxisMax,
-                                                                        color = PrimaryBrown
-                                                                )
-                                                                // 여유로움 (SecondaryBeige)
-                                                                MoodBarItem(
-                                                                        value = item.relaxed,
-                                                                        max = yAxisMax,
-                                                                        color = SecondaryBeige
+                                                                        value = value.toInt(),
+                                                                        max = finalMax.toInt(),
+                                                                        color = barColor
                                                                 )
                                                         }
                                                 }
@@ -144,17 +190,17 @@ fun MoodStateUsageSection() {
 
                 // X축 레이블 (그래프 아래 위치)
                 Row(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(modifier = Modifier.width(24.dp))
+                        Spacer(modifier = Modifier.width(32.dp)) // Y축 너비만큼 공백
                         Spacer(modifier = Modifier.width(Spacing.S))
 
                         Row(modifier = Modifier.weight(1f).padding(horizontal = Spacing.S)) {
-                                moodStateData.forEach { item ->
+                                chartData.forEach { (label, _) ->
                                         Box(
                                                 modifier = Modifier.weight(1f),
                                                 contentAlignment = Alignment.Center
                                         ) {
                                                 Text(
-                                                        text = item.moodLabel,
+                                                        text = label,
                                                         fontSize = FontSizes.Small,
                                                         color = PrimaryBrown,
                                                         textAlign = TextAlign.Center
@@ -163,18 +209,6 @@ fun MoodStateUsageSection() {
                                 }
                         }
                 }
-
-                Spacer(modifier = Modifier.height(Spacing.M))
-
-                // 범례 (Legend)
-                Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                ) {
-                        MoodLegendItem(color = PrimaryBrown, label = "바쁨")
-                        Spacer(modifier = Modifier.width(Spacing.L))
-                        MoodLegendItem(color = SecondaryBeige, label = "여유로움")
-                }
         }
 }
 
@@ -182,26 +216,11 @@ fun MoodStateUsageSection() {
 private fun MoodBarItem(value: Int, max: Int, color: androidx.compose.ui.graphics.Color) {
         Box(
                 modifier =
-                        Modifier.width(18.dp) // 막대 너비
+                        Modifier.width(30.dp) // 막대 너비
                                 .fillMaxHeight(fraction = (value.toFloat() / max).coerceIn(0f, 1f))
                                 .background(
                                         color,
-                                        RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                                        RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                                 )
         )
-}
-
-@Composable
-private fun MoodLegendItem(color: androidx.compose.ui.graphics.Color, label: String) {
-        Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.XS)
-        ) {
-                Box(modifier = Modifier.size(12.dp).background(color))
-                Text(
-                        text = label,
-                        fontSize = FontSizes.Small,
-                        color = PrimaryBrown.copy(alpha = 0.8f)
-                )
-        }
 }

@@ -17,14 +17,18 @@ object ServerUploadManager {
             "http://ceprj2.gachon.ac.kr:65042/api/daily-summary/upload"
     private const val BATCH_URL = "http://ceprj2.gachon.ac.kr:65042/api/usage/batch"
 
-    // ✅ JWT 토큰
-    private val AUTH_TOKEN = TokenManager.AUTH_TOKEN
+    // Token is retrieved dynamically using Context
 
     private val client = OkHttpClient()
     private val JSON_MEDIA_type = "application/json; charset=utf-8".toMediaType()
     private const val MOOD_URL = "http://ceprj2.gachon.ac.kr:65042/api/moods"
 
-    fun uploadMoodState(emotion: String, status: String, onResult: (Boolean) -> Unit) {
+    fun uploadMoodState(
+            context: android.content.Context,
+            emotion: String,
+            status: String,
+            onResult: (Boolean) -> Unit
+    ) {
         val jsonString =
                 """
             {
@@ -33,14 +37,26 @@ object ServerUploadManager {
             }
         """.trimIndent()
 
-        uploadToUrl(MOOD_URL, jsonString) { success, _ -> onResult(success) }
+        uploadToUrl(context, MOOD_URL, jsonString) { success, _ -> onResult(success) }
     }
 
-    fun uploadJson(jsonString: String, onResult: (Boolean, String) -> Unit) {
+    fun uploadJson(
+            context: android.content.Context,
+            jsonString: String,
+            onResult: (Boolean, String) -> Unit
+    ) {
+        // 서버의 두 엔드포인트가 서로 다른 키 이름을 요구함
+        // api/usage/batch -> "package_data"
+        // api/daily-summary/upload -> "package"
+
+        // 현재 WeeklyUsageExporter는 "package_data"를 생성함.
+        // 따라서 daily-summary용으로는 "package"로 치환해야 함.
+        val jsonForDaily = jsonString.replace("\"package_data\":", "\"package\":")
+
         // 1. Daily Summary 업로드
-        uploadToUrl(DAILY_SUMMARY_URL, jsonString) { success1, msg1 ->
+        uploadToUrl(context, DAILY_SUMMARY_URL, jsonForDaily) { success1, msg1 ->
             // 2. Batch 업로드 (Daily Summary 결과와 무관하게 시도)
-            uploadToUrl(BATCH_URL, jsonString) { success2, msg2 ->
+            uploadToUrl(context, BATCH_URL, jsonString) { success2, msg2 ->
                 // 두 결과 종합
                 if (success1 && success2) {
                     onResult(true, "모든 서버 전송 성공")
@@ -55,12 +71,18 @@ object ServerUploadManager {
         }
     }
 
-    private fun uploadToUrl(url: String, jsonString: String, onResult: (Boolean, String) -> Unit) {
+    private fun uploadToUrl(
+            context: android.content.Context,
+            url: String,
+            jsonString: String,
+            onResult: (Boolean, String) -> Unit
+    ) {
+        val token = com.example.emotionapp.data.local.TokenManager(context).getAccessToken()
         val requestBody = jsonString.toRequestBody(JSON_MEDIA_type)
         val request =
                 Request.Builder()
                         .url(url)
-                        .addHeader("Authorization", "Bearer $AUTH_TOKEN")
+                        .addHeader("Authorization", "Bearer $token")
                         .post(requestBody)
                         .build()
 
@@ -81,11 +103,15 @@ object ServerUploadManager {
                                         )
                                         onResult(true, "Success")
                                     } else {
+                                        val errorDetail = response.body?.string()
                                         Log.e(
                                                 "ServerUpload",
-                                                "Upload to $url failed: ${response.code}"
+                                                "Upload to $url failed: ${response.code} / Body: $errorDetail"
                                         )
-                                        onResult(false, "Error code: ${response.code}")
+                                        onResult(
+                                                false,
+                                                "Error code: ${response.code}, Msg: $errorDetail"
+                                        )
                                     }
                                 }
                             }

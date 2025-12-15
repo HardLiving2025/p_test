@@ -17,11 +17,14 @@ import com.example.emotionapp.ui.theme.*
 
 @Composable
 fun TimeUsageSection(period: Period, refreshTrigger: Int = 0) {
+        val context = androidx.compose.ui.platform.LocalContext.current
         var usageResponse by remember { mutableStateOf<UsageAverageResponse?>(null) }
 
         // 데이터 로드
         LaunchedEffect(Unit, refreshTrigger) {
-                UsageAnalysisManager.fetchUsageAverages { response -> usageResponse = response }
+                UsageAnalysisManager.fetchUsageAverages(context) { response ->
+                        usageResponse = response
+                }
         }
 
         // 선택된 탭에 따른 데이터 추출

@@ -34,20 +34,24 @@ object UsageAnalysisManager {
         private const val URL =
                 "http://ceprj2.gachon.ac.kr:65042/api/analysis/usage-by-slot-average"
 
-        // JWT 토큰 (ServerUploadManager와 동일)
-        private val AUTH_TOKEN = TokenManager.AUTH_TOKEN
+        // Token is retrieved dynamically
 
         private val client = OkHttpClient()
 
         /**
          * 서버에서 시간대별 평균 사용량 데이터를 가져옵니다.
+         * @param context 컨텍스트 (토큰 조회용)
          * @param onResult 콜백 (성공 시 데이터, 실패 시 null)
          */
-        fun fetchUsageAverages(onResult: (UsageAverageResponse?) -> Unit) {
+        fun fetchUsageAverages(
+                context: android.content.Context,
+                onResult: (UsageAverageResponse?) -> Unit
+        ) {
+                val token = com.example.emotionapp.data.local.TokenManager(context).getAccessToken()
                 val request =
                         Request.Builder()
                                 .url(URL)
-                                .addHeader("Authorization", "Bearer $AUTH_TOKEN")
+                                .addHeader("Authorization", "Bearer $token")
                                 .get()
                                 .build()
 
@@ -190,7 +194,124 @@ object UsageAnalysisManager {
                 return list.sortedBy { it.slot }
         }
 
-        /** ✅ 디버깅용: 파싱된 UsageAverageResponse 내용을 예쁘게 로그로 출력 */
+        /** 감정별 평균 사용량 API 호출 */
+        private const val EMOTION_URL =
+                "http://ceprj2.gachon.ac.kr:65042/api/analysis/usage-by-emotion-average"
+
+        fun fetchUsageByEmotionAverage(
+                context: android.content.Context,
+                onResult: (Map<String, Map<String, Long>>?) -> Unit
+        ) {
+                val token = com.example.emotionapp.data.local.TokenManager(context).getAccessToken()
+                val request =
+                        Request.Builder()
+                                .url(EMOTION_URL)
+                                .addHeader("Authorization", "Bearer $token")
+                                .get()
+                                .build()
+
+                client.newCall(request)
+                        .enqueue(
+                                object : Callback {
+                                        override fun onFailure(call: Call, e: IOException) {
+                                                Log.e(
+                                                        "UsageAnalysis",
+                                                        "❌ Failed to fetch emotion usage",
+                                                        e
+                                                )
+                                                postResultRaw(onResult, null)
+                                        }
+
+                                        override fun onResponse(call: Call, response: Response) {
+                                                response.use {
+                                                        if (!response.isSuccessful) {
+                                                                Log.e(
+                                                                        "UsageAnalysis",
+                                                                        "❌ Server error: ${response.code}"
+                                                                )
+                                                                postResultRaw(onResult, null)
+                                                                return
+                                                        }
+
+                                                        val body = response.body?.string()
+                                                        if (body == null) {
+                                                                postResultRaw(onResult, null)
+                                                                return
+                                                        }
+
+                                                        try {
+                                                                // JSON 구조:
+                                                                // {
+                                                                //   "yesterday": { "GOOD": {"SNS":
+                                                                // 10, ...}, ... },
+                                                                //   ...
+                                                                // }
+                                                                // 여기서는 "yesterday" 데이터만 사용하거나, 필요에
+                                                                // 따라 선택
+                                                                val json = JSONObject(body)
+                                                                val yesterday =
+                                                                        json.optJSONObject(
+                                                                                "yesterday"
+                                                                        )
+                                                                val result =
+                                                                        mutableMapOf<
+                                                                                String,
+                                                                                Map<String, Long>>()
+
+                                                                if (yesterday != null) {
+                                                                        val keys = yesterday.keys()
+                                                                        while (keys.hasNext()) {
+                                                                                val emotion =
+                                                                                        keys.next() // GOOD, NORMAL, BAD
+                                                                                val cats =
+                                                                                        yesterday
+                                                                                                .getJSONObject(
+                                                                                                        emotion
+                                                                                                )
+
+                                                                                val catMap =
+                                                                                        mutableMapOf<
+                                                                                                String,
+                                                                                                Long>()
+                                                                                catMap["SNS"] =
+                                                                                        cats.optLong(
+                                                                                                "SNS"
+                                                                                        )
+                                                                                catMap["GAME"] =
+                                                                                        cats.optLong(
+                                                                                                "GAME"
+                                                                                        )
+                                                                                catMap["OTHER"] =
+                                                                                        cats.optLong(
+                                                                                                "OTHER"
+                                                                                        )
+
+                                                                                result[emotion] =
+                                                                                        catMap
+                                                                        }
+                                                                }
+                                                                postResultRaw(onResult, result)
+                                                        } catch (e: Exception) {
+                                                                Log.e(
+                                                                        "UsageAnalysis",
+                                                                        "❌ Parsing error",
+                                                                        e
+                                                                )
+                                                                postResultRaw(onResult, null)
+                                                        }
+                                                }
+                                        }
+                                }
+                        )
+        }
+
+        private fun postResultRaw(
+                onResult: (Map<String, Map<String, Long>>?) -> Unit,
+                data: Map<String, Map<String, Long>>?
+        ) {
+                Handler(Looper.getMainLooper()).post { onResult(data) }
+        }
+
         private fun logUsageAverages(tag: String, data: UsageAverageResponse?) {
                 if (data == null) {
                         Log.e("UsageAnalysis", "[$tag] ❌ 서버 응답 NULL (파싱 실패 또는 서버 오류)")

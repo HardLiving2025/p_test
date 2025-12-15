@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun StateSelector(mood: String, onNext: () -> Unit) {
+        val context = androidx.compose.ui.platform.LocalContext.current
         val scope = rememberCoroutineScope()
 
         var selectedState by remember { mutableStateOf<String?>(null) }
@@ -99,8 +100,9 @@ fun StateSelector(mood: String, onNext: () -> Unit) {
                                                 }
 
                                         ServerUploadManager.uploadMoodState(
-                                                apiEmotion,
-                                                apiStatus
+                                                context = context,
+                                                emotion = apiEmotion,
+                                                status = apiStatus
                                         ) { success ->
                                                 // 성공 여부와 관계없이 화면 이동
                                                 // OkHttp 콜백은 백그라운드 스레드에서 오므로 Main 스레드로 전환
