@@ -15,7 +15,13 @@ fun AppNav() {
     NavHost(navController = navController, startDestination = "onboarding") {
         composable("onboarding") {
             com.example.emotionapp.ui.screens.OnboardingScreen(
-                    onComplete = { navController.navigate("mood") }
+                    onComplete = { navController.navigate("login") }
+            )
+        }
+
+        composable("login") {
+            com.example.emotionapp.ui.screens.LoginScreen(
+                    onLogin = { navController.navigate("mood") }
             )
         }
 
