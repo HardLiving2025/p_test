@@ -32,7 +32,11 @@ fun AnalysisTab(period: Period, refreshTrigger: Int = 0) {
         Spacer(modifier = Modifier.height(12.dp))
 
         // 감정별 평균 사용량 + 앱 상세
-        EmotionUsageSection(showDetail = showDetail, onToggleDetail = { showDetail = !showDetail })
+        EmotionUsageSection(
+                period = period,
+                showDetail = showDetail,
+                onToggleDetail = { showDetail = !showDetail }
+        )
         Spacer(modifier = Modifier.height(12.dp))
 
         // 시간대별 평균 사용량
@@ -40,7 +44,7 @@ fun AnalysisTab(period: Period, refreshTrigger: Int = 0) {
         Spacer(modifier = Modifier.height(12.dp))
 
         // 감정/상황별 총 사용량
-        MoodStateUsageSection()
+        MoodStateUsageSection(period = period)
         Spacer(modifier = Modifier.height(12.dp))
 
         // 위험 감정 조합
@@ -48,7 +52,7 @@ fun AnalysisTab(period: Period, refreshTrigger: Int = 0) {
         Spacer(modifier = Modifier.height(12.dp))
 
         // 주요 패턴(인사이트)
-        KeyPatternsSection()
+        KeyPatternsSection(period = period)
     }
 }
 

@@ -35,41 +35,206 @@ private data class AppDetail(
 )
 
 @Composable
-fun EmotionUsageSection(showDetail: Boolean, onToggleDetail: () -> Unit) {
-        // 감정별 평균 사용량 데이터
-        val moodData =
-                listOf(
-                        MoodUsage("😊 좋음", sns = 45, other = 30, game = 25),
-                        MoodUsage("🙂 보통", sns = 60, other = 50, game = 35),
-                        MoodUsage("😞 나쁨", sns = 75, other = 95, game = 40)
-                )
+fun EmotionUsageSection(
+        period: com.example.emotionapp.ui.screens.Period,
+        showDetail: Boolean,
+        onToggleDetail: () -> Unit
+) {
+        val context = androidx.compose.ui.platform.LocalContext.current
 
-        // 앱별 감정 상세 데이터
-        val appDetailData =
-                listOf(
-                        AppDetail(
-                                "Naver Webtoon",
-                                "📚",
-                                total = 350,
-                                good = 80,
-                                normal = 120,
-                                bad = 150
-                        ),
-                        AppDetail(
-                                "Instagram",
-                                "📷",
-                                total = 255,
-                                good = 50,
-                                normal = 80,
-                                bad = 125
-                        ),
-                        AppDetail("YouTube", "▶️", total = 180, good = 40, normal = 70, bad = 70),
-                        AppDetail("TikTok", "🎵", total = 150, good = 30, normal = 50, bad = 70),
-                        AppDetail("Twitter", "🐦", total = 120, good = 40, normal = 50, bad = 30)
-                )
+        // 1. 감정별 평균 사용량 (SNS, GAME, OTHER)
+        var moodData by remember { mutableStateOf<List<MoodUsage>>(emptyList()) }
+        // 2. 앱별 감정 상세 데이터
+        var appDetailData by remember { mutableStateOf<List<AppDetail>>(emptyList()) }
+
+        // Period가 바뀌면 다시 Fetch할 수도 있지만, 여기서는 한번 Fetch 후 Period에 따라 필터링하는 방식이 좋을지,
+        // 아니면 매번 새로고침할지 결정해야 합니다.
+        // UsageAnalysisManager 구조상 한번에 다 받아오므로, LaunchedEffect 내에서 Period에 따라 state를 갱신합니다.
+
+        LaunchedEffect(period) {
+                // Fetch Mood Average
+                com.example.emotionapp.data.UsageAnalysisManager.fetchUsageByEmotionAverage(
+                        context
+                ) { result ->
+                        if (result != null) {
+                                android.util.Log.d("EmotionUsageSection", "Data received: $result")
+                                val periodKey =
+                                        when (period) {
+                                                com.example.emotionapp.ui.screens.Period
+                                                        .YESTERDAY -> result.yesterday
+                                                com.example.emotionapp.ui.screens.Period.WEEK ->
+                                                        result.week1
+                                                com.example.emotionapp.ui.screens.Period
+                                                        .TWO_WEEKS -> result.week2
+                                                com.example.emotionapp.ui.screens.Period.MONTH ->
+                                                        result.month1
+                                        }
+
+                                val list =
+                                        listOf(
+                                                        "GOOD" to "😊 좋음",
+                                                        "NORMAL" to "🙂 보통",
+                                                        "BAD" to "😞 나쁨"
+                                                )
+                                                .map { (key, label) ->
+                                                        val map = periodKey[key]
+                                                        // map이 null일 경우를 대비해 기본값 처리
+                                                        val safeMap = map ?: emptyMap()
+
+                                                        val sns =
+                                                                (safeMap["SNS"] ?: 0L) / (1000 * 60)
+                                                        val game =
+                                                                (safeMap["GAME"]
+                                                                        ?: 0L) / (1000 * 60)
+                                                        val other =
+                                                                (safeMap["OTHER"]
+                                                                        ?: 0L) / (1000 * 60)
+                                                        MoodUsage(
+                                                                label,
+                                                                sns.toInt(),
+                                                                other.toInt(),
+                                                                game.toInt()
+                                                        )
+                                                }
+                                moodData = list
+                        }
+                }
+
+                // Fetch App Ratios
+                com.example.emotionapp.data.UsageAnalysisManager.fetchAppRatiosByEmotion(context) {
+                        result ->
+                        if (result != null) {
+                                val periodKey =
+                                        when (period) {
+                                                com.example.emotionapp.ui.screens.Period
+                                                        .YESTERDAY -> result.yesterday
+                                                com.example.emotionapp.ui.screens.Period.WEEK ->
+                                                        result.week1
+                                                com.example.emotionapp.ui.screens.Period
+                                                        .TWO_WEEKS -> result.week2
+                                                com.example.emotionapp.ui.screens.Period.MONTH ->
+                                                        result.month1
+                                        }
+
+                                // Flatten the list essentially or pick top 5 across all emotions?
+                                // The UI shows "App Detail", presumably aggregating all emotions or
+                                // showing top apps.
+                                // The original logic mapped `result` (list) directly. Now we have
+                                // `result` (Map<Emotion, List>).
+                                // Let's aggregate all apps from all emotions for the "App Detail"
+                                // list.
+
+                                val aggregatedApps = mutableMapOf<String, AppDetail>()
+
+                                periodKey.forEach { (_, apps) ->
+                                        apps.forEach { app ->
+                                                // We need to merge stats if the same app appears in
+                                                // multiple emotions?
+                                                // Actually the API structure is "GOOD": [{app
+                                                // stats}], "NORMAL": ...
+                                                // The previous code expected a flat list.
+                                                // Let's assume we want to show a consolidated list.
+
+                                                // Simplified: Just collect all distinct apps and
+                                                // sum their usage?
+                                                // Or does the API return 'total' which is total for
+                                                // that app regardless of emotion?
+                                                // Looking at user provided JSON:
+                                                // "GOOD": [{ "app":..., "ms": ... }]
+                                                // This seems like usage *while* feeling GOOD.
+
+                                                // Let's create or update the AppDetail entry.
+                                                val existing = aggregatedApps[app.pkgName]
+                                                val totalMin =
+                                                        (app.totalTime / (1000 * 60))
+                                                                .toInt() // This is time for THIS
+                                                // emotion
+
+                                                // Since we don't know which emotion this specific
+                                                // entry belongs to without the key,
+                                                // we iterate through keys.
+                                        }
+                                }
+
+                                /**
+                                 * Re-implementing aggregation logic correctly: Iterate "GOOD",
+                                 * "NORMAL", "BAD". For each app in that list, add to its
+                                 * total/good/normal/bad stats.
+                                 */
+                                val appMap = mutableMapOf<String, AppDetail>()
+
+                                periodKey.forEach { (emotion, apps) ->
+                                        apps.forEach { item ->
+                                                val pkg = item.pkgName
+                                                val timeMin = (item.totalTime / (1000 * 60)).toInt()
+
+                                                val current =
+                                                        appMap.getOrPut(pkg) {
+                                                                val icon =
+                                                                        when {
+                                                                                item.appName
+                                                                                        .contains(
+                                                                                                "kakao",
+                                                                                                true
+                                                                                        ) -> "💬"
+                                                                                item.appName
+                                                                                        .contains(
+                                                                                                "insta",
+                                                                                                true
+                                                                                        ) -> "📷"
+                                                                                item.appName
+                                                                                        .contains(
+                                                                                                "tube",
+                                                                                                true
+                                                                                        ) -> "▶️"
+                                                                                item.appName
+                                                                                        .contains(
+                                                                                                "talk",
+                                                                                                true
+                                                                                        ) -> "🎵"
+                                                                                else -> "📱"
+                                                                        }
+                                                                AppDetail(
+                                                                        item.appName,
+                                                                        icon,
+                                                                        0,
+                                                                        0,
+                                                                        0,
+                                                                        0
+                                                                )
+                                                        }
+
+                                                val newTotal = current.total + timeMin
+                                                val newGood =
+                                                        current.good +
+                                                                if (emotion == "GOOD") timeMin
+                                                                else 0
+                                                val newNormal =
+                                                        current.normal +
+                                                                if (emotion == "NORMAL") timeMin
+                                                                else 0
+                                                val newBad =
+                                                        current.bad +
+                                                                if (emotion == "BAD") timeMin else 0
+
+                                                appMap[pkg] =
+                                                        current.copy(
+                                                                total = newTotal,
+                                                                good = newGood,
+                                                                normal = newNormal,
+                                                                bad = newBad
+                                                        )
+                                        }
+                                }
+
+                                appDetailData =
+                                        appMap.values.sortedByDescending { it.total }.toList()
+                        }
+                }
+        }
 
         val totalUsage = appDetailData.sumOf { it.total }
-        val maxTotal = appDetailData.maxOf { it.total }
+        val maxTotal = appDetailData.maxOfOrNull { it.total } ?: 1
 
         Column(
                 modifier =
