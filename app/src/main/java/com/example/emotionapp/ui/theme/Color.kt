@@ -12,3 +12,4 @@ val AccentBlue = Color(0xFFCAF1FF) // #CAF1FF
 val SurfaceWhite = Color(0xFFFFFFFF)
 val DisabledGray = Color(0xFF9CA3AF)
 val HighlightOrange = Color(0xFFEDBE77) // #EDBE77
+val OnboardingBackground = Color(0xFFF0F0F0) // #F0F0F0
