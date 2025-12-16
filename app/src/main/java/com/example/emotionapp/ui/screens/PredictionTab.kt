@@ -2,12 +2,15 @@ package com.example.emotionapp.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,21 +26,30 @@ import com.example.emotionapp.ui.theme.Spacing
 
 @Composable
 fun PredictionTab(period: Period) {
-    // 오늘의 기분/상태 (실제로는 앱에서 전달받아야 함)
-    val todayMood = "😞 나쁨"
-    val todayState = "여유로움"
-
     val context = androidx.compose.ui.platform.LocalContext.current
     var predictionData by remember {
         mutableStateOf<com.example.emotionapp.data.PredictionResponse?>(null)
+    }
+    var descriptionData by remember {
+        mutableStateOf<com.example.emotionapp.data.PredictionDescriptionResponse?>(null)
     }
     var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         isLoading = true
+        // Fetch both concurrently if possible, or sequentially
+        // For simplicity here, sequential or independent
         com.example.emotionapp.data.PredictionManager.fetchPrediction(context) { result ->
             predictionData = result
-            isLoading = false
+            // Check if both loaded to stop loading? Or separate loading?
+            // Simple logic: wait for both if fetched together, or separate states.
+            // Better: Check if both are non-null to hide loading if we want stricter loading,
+            // but fetchDescription is also async.
+            // Let's nest them or use a counter.
+            com.example.emotionapp.data.PredictionManager.fetchDescription(context) { descResult ->
+                descriptionData = descResult
+                isLoading = false
+            }
         }
     }
 
@@ -62,20 +74,46 @@ fun PredictionTab(period: Period) {
         }
 
         if (isLoading) {
-            androidx.compose.foundation.layout.Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                Text(
-                        text = "계산중입니다...",
-                        fontSize = FontSizes.Title,
-                        color = PrimaryBrown,
-                        fontWeight = FontWeight.SemiBold
-                )
+            PredictionCard {
+                androidx.compose.foundation.layout.Box(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.L),
+                        contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    var activeDotIndex by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            kotlinx.coroutines.delay(300)
+                            activeDotIndex = (activeDotIndex + 1) % 3
+                        }
+                    }
+
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.Bottom) {
+                        Text(
+                                text = "계산중입니다",
+                                fontSize = FontSizes.Title,
+                                color = PrimaryBrown,
+                                fontWeight = FontWeight.SemiBold
+                        )
+                        repeat(3) { index ->
+                            Text(
+                                    text = ".",
+                                    fontSize = FontSizes.Title,
+                                    color =
+                                            PrimaryBrown.copy(
+                                                    alpha =
+                                                            if (index == activeDotIndex) 1f
+                                                            else 0.3f
+                                            ),
+                                    fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
             }
-        } else if (predictionData != null) {
+        } else {
             // 오늘의 기분/상태
-            TodayMoodState(mood = todayMood, state = todayState)
+            TodayMoodState(descriptionData)
 
             // 위험 예측
             CurrentPrediction(predictionData)
