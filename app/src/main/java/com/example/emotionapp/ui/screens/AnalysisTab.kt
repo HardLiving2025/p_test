@@ -23,64 +23,64 @@ import com.example.emotionapp.ui.theme.SurfaceWhite
 
 @Composable
 fun AnalysisTab(period: Period, refreshTrigger: Int = 0) {
-    var showDetail by remember { mutableStateOf(false) }
+        var showDetail by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // 헤더 카드
-        AnalysisHeaderCard(period = period)
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                // 헤더 카드
+                AnalysisHeaderCard(period = period)
 
-        Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-        // 감정별 평균 사용량 + 앱 상세
-        EmotionUsageSection(
-                period = period,
-                showDetail = showDetail,
-                onToggleDetail = { showDetail = !showDetail }
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+                // 감정별 평균 사용량 + 앱 상세
+                EmotionUsageSection(
+                        period = period,
+                        showDetail = showDetail,
+                        onToggleDetail = { showDetail = !showDetail }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
 
-        // 시간대별 평균 사용량
-        TimeUsageSection(period = period, refreshTrigger = refreshTrigger)
-        Spacer(modifier = Modifier.height(12.dp))
+                // 시간대별 평균 사용량
+                TimeUsageSection(period = period, refreshTrigger = refreshTrigger)
+                Spacer(modifier = Modifier.height(12.dp))
 
-        // 감정/상황별 총 사용량
-        MoodStateUsageSection(period = period)
-        Spacer(modifier = Modifier.height(12.dp))
+                // 감정/상황별 총 사용량
+                MoodStateUsageSection(period = period)
+                Spacer(modifier = Modifier.height(12.dp))
 
-        // 위험 감정 조합
-        RiskCombinationSection()
-        Spacer(modifier = Modifier.height(12.dp))
+                // 위험 감정 조합
+                RiskCombinationSection(period = period)
+                Spacer(modifier = Modifier.height(12.dp))
 
-        // 주요 패턴(인사이트)
-        KeyPatternsSection(period = period)
-    }
+                // 주요 패턴(인사이트)
+                KeyPatternsSection(period = period)
+        }
 }
 
 @Composable
 private fun AnalysisHeaderCard(period: Period) {
-    Column(
-            modifier =
-                    Modifier.fillMaxWidth()
-                            .background(SurfaceWhite, RoundedCornerShape(16.dp))
-                            .padding(16.dp)
-    ) {
-        Text(
-                text = "분석",
-                fontSize = FontSizes.Title,
-                fontWeight = FontWeight.Bold,
-                color = PrimaryBrown
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-                text =
-                        when (period) {
-                            Period.YESTERDAY -> "어제의 패턴을 분석했어요"
-                            Period.WEEK -> "최근 일주일의 패턴을 분석했어요"
-                            Period.TWO_WEEKS -> "최근 2주일의 패턴을 분석했어요"
-                            Period.MONTH -> "최근 한달의 패턴을 분석했어요"
-                        },
-                fontSize = FontSizes.Normal,
-                color = PrimaryBrown.copy(alpha = 0.7f)
-        )
-    }
+        Column(
+                modifier =
+                        Modifier.fillMaxWidth()
+                                .background(SurfaceWhite, RoundedCornerShape(16.dp))
+                                .padding(16.dp)
+        ) {
+                Text(
+                        text = "분석",
+                        fontSize = FontSizes.Title,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryBrown
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                        text =
+                                when (period) {
+                                        Period.YESTERDAY -> "어제의 패턴을 분석했어요"
+                                        Period.WEEK -> "최근 일주일의 패턴을 분석했어요"
+                                        Period.TWO_WEEKS -> "최근 2주일의 패턴을 분석했어요"
+                                        Period.MONTH -> "최근 한달의 패턴을 분석했어요"
+                                },
+                        fontSize = FontSizes.Normal,
+                        color = PrimaryBrown.copy(alpha = 0.7f)
+                )
+        }
 }
