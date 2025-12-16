@@ -66,7 +66,7 @@ fun HomeScreen() {
                         BottomTab(HomeTab.SETTINGS, "설정", Icons.Filled.Settings)
                 )
 
-        val showPeriodSelector = activeTab != HomeTab.SETTINGS
+        val showPeriodSelector = activeTab != HomeTab.SETTINGS && activeTab != HomeTab.PREDICTION
 
         // 데이터 리프레시 트리거 (버전)
         var refreshTrigger by remember { mutableStateOf(0) }
@@ -107,8 +107,7 @@ fun HomeScreen() {
                                                                 period = selectedPeriod,
                                                                 refreshTrigger = refreshTrigger
                                                         )
-                                                HomeTab.PREDICTION ->
-                                                        PredictionTab(period = selectedPeriod)
+                                                HomeTab.PREDICTION -> PredictionTab()
                                                 HomeTab.NOTIFICATION ->
                                                         NotificationTab(period = selectedPeriod)
                                                 HomeTab.SETTINGS -> SettingsTab()
