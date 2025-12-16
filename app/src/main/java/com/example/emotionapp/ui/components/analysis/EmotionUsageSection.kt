@@ -334,7 +334,9 @@ fun EmotionUsageSection(
                                                                 verticalAlignment =
                                                                         Alignment.Bottom,
                                                                 horizontalArrangement =
-                                                                        Arrangement.spacedBy(4.dp),
+                                                                        Arrangement.spacedBy(
+                                                                                Spacing.XS
+                                                                        ),
                                                                 modifier = Modifier.fillMaxHeight()
                                                         ) {
                                                                 // SNS (PrimaryBrown)
@@ -366,7 +368,7 @@ fun EmotionUsageSection(
 
                 // X축 레이블 (그래프 아래 위치)
                 Row(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(modifier = Modifier.width(24.dp))
+                        Spacer(modifier = Modifier.width(Spacing.XXL))
                         Spacer(modifier = Modifier.width(Spacing.S))
 
                         Row(modifier = Modifier.weight(1f).padding(horizontal = Spacing.S)) {
@@ -607,7 +609,10 @@ private fun BarItem(value: Int, max: Int = 100, color: Color) {
                                 .fillMaxHeight(fraction = (value.toFloat() / max).coerceIn(0f, 1f))
                                 .background(
                                         color,
-                                        RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                                        RoundedCornerShape(
+                                                topStart = Spacing.XS,
+                                                topEnd = Spacing.XS
+                                        )
                                 )
         )
 }
@@ -618,7 +623,7 @@ private fun LegendItem(color: Color, label: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.XS)
         ) {
-                Box(modifier = Modifier.size(12.dp).background(color))
+                Box(modifier = Modifier.size(Spacing.M).background(color))
                 Text(
                         text = label,
                         fontSize = FontSizes.Small,

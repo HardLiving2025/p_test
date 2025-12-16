@@ -32,7 +32,7 @@ fun MoodSelector(onNext: (String) -> Unit) {
                 modifier =
                         Modifier.fillMaxSize()
                                 .background(BackgroundBeige) // 여기서 사용됨
-                                .padding(24.dp),
+                                .padding(Spacing.XXL),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
         ) {
@@ -40,26 +40,29 @@ fun MoodSelector(onNext: (String) -> Unit) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.SectionGap)) {
                         moods.forEach { (id, emoji, _) ->
                                 Box(
                                         modifier =
                                                 Modifier.size(96.dp)
                                                         .background(
                                                                 SurfaceWhite,
-                                                                RoundedCornerShape(24.dp)
+                                                                RoundedCornerShape(Spacing.XXL)
                                                         )
                                                         .border(
-                                                                width = 4.dp,
+                                                                width = Spacing.XS,
                                                                 color =
                                                                         if (selectedMood == id)
                                                                                 AccentBlue // 선택된 색
                                                                         // (#CAF1FF)
                                                                         else
                                                                                 SecondaryBeige, // 비선택 상태 (#D2BDA8)
-                                                                shape = RoundedCornerShape(24.dp)
+                                                                shape =
+                                                                        RoundedCornerShape(
+                                                                                Spacing.XXL
+                                                                        )
                                                         )
-                                                        .clip(RoundedCornerShape(24.dp))
+                                                        .clip(RoundedCornerShape(Spacing.XXL))
                                                         .clickable { selectedMood = id },
                                         contentAlignment = Alignment.Center
                                 ) { Text(text = emoji, fontSize = 36.sp) }

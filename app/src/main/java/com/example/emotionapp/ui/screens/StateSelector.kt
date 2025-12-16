@@ -30,7 +30,7 @@ fun StateSelector(mood: String, onNext: () -> Unit) {
                 modifier =
                         Modifier.fillMaxSize()
                                 .background(BackgroundBeige) // #ECE4D8
-                                .padding(24.dp),
+                                .padding(Spacing.XXL),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
         ) {
@@ -45,7 +45,7 @@ fun StateSelector(mood: String, onNext: () -> Unit) {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // 버튼 영역
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.SectionGap)) {
                         states.forEach { (id, label) ->
                                 Box(
                                         modifier =
@@ -53,19 +53,22 @@ fun StateSelector(mood: String, onNext: () -> Unit) {
                                                         .height(80.dp)
                                                         .background(
                                                                 SurfaceWhite,
-                                                                RoundedCornerShape(20.dp)
+                                                                RoundedCornerShape(Spacing.XL)
                                                         )
                                                         .border(
-                                                                width = 4.dp,
+                                                                width = Spacing.XS,
                                                                 color =
                                                                         if (selectedState == id)
                                                                                 AccentBlue // 선택됨
                                                                         // (#CAF1FF)
                                                                         else
                                                                                 SecondaryBeige, // 비선택 (#D2BDA8)
-                                                                shape = RoundedCornerShape(20.dp)
+                                                                shape =
+                                                                        RoundedCornerShape(
+                                                                                Spacing.XL
+                                                                        )
                                                         )
-                                                        .clip(RoundedCornerShape(20.dp))
+                                                        .clip(RoundedCornerShape(Spacing.XL))
                                                         .clickable { selectedState = id },
                                         contentAlignment = Alignment.Center
                                 ) {

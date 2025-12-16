@@ -174,7 +174,9 @@ fun MoodStateUsageSection(period: com.example.emotionapp.ui.screens.Period) {
                                                         // 두 개의 막대 (Busy, Free)
                                                         Row(
                                                                 horizontalArrangement =
-                                                                        Arrangement.spacedBy(4.dp),
+                                                                        Arrangement.spacedBy(
+                                                                                Spacing.XS
+                                                                        ),
                                                                 verticalAlignment = Alignment.Bottom
                                                         ) {
                                                                 // Busy Bar
@@ -238,11 +240,14 @@ fun MoodStateUsageSection(period: com.example.emotionapp.ui.screens.Period) {
 private fun MoodBarItem(value: Int, max: Int, color: Color) {
         Box(
                 modifier =
-                        Modifier.width(16.dp) // 그룹 내 막대라 조금 얇게
+                        Modifier.width(Spacing.L) // 그룹 내 막대라 조금 얇게
                                 .fillMaxHeight(fraction = (value.toFloat() / max).coerceIn(0f, 1f))
                                 .background(
                                         color,
-                                        RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+                                        RoundedCornerShape(
+                                                topStart = Spacing.XS,
+                                                topEnd = Spacing.XS
+                                        )
                                 )
         )
 }
@@ -253,7 +258,7 @@ private fun MoodLegendItem(color: Color, label: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.XS)
         ) {
-                Box(modifier = Modifier.size(12.dp).background(color))
+                Box(modifier = Modifier.size(Spacing.M).background(color))
                 Text(
                         text = label,
                         fontSize = FontSizes.Small,
