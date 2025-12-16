@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "252619851752",
+    "project_id": "screencomma",
+    "storage_bucket": "screencomma.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252619851752:android:c623da4d6cda9b35b7865d",
+        "android_client_info": {
+          "package_name": "com.example.emotionapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5YA3KAXGeK7NnY5Gsf8_u7hOc0k8IuO4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

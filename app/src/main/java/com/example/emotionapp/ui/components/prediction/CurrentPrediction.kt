@@ -14,6 +14,11 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,23 +31,37 @@ import com.example.emotionapp.ui.theme.Spacing
 
 @Composable
 fun CurrentPrediction() {
-    PredictionCard {
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.L)) {
-            RiskItem(
-                    icon = Icons.Filled.Warning,
-                    title = "위험도 높음",
-                    description = "기분이 좋지 않은 날 기타 앱 과다 소비 위험도가 높습니다"
-            )
-            RiskItem(
-                    icon = Icons.Filled.Schedule,
-                    title = "시간대 예측",
-                    description = "오늘도 22~24시에 숏폼 콘텐츠 사용 가능성이 높아요."
-            )
-            RiskItem(
-                    icon = Icons.Filled.Warning,
-                    title = "패턴 감지",
-                    description = "패턴 감지 → SNS 사용 주의"
-            )
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var predictionData by remember {
+        mutableStateOf<com.example.emotionapp.data.PredictionResponse?>(null)
+    }
+
+    LaunchedEffect(Unit) {
+        com.example.emotionapp.data.PredictionManager.fetchPrediction(context) { result ->
+            predictionData = result
+        }
+    }
+
+    // Local variable for smart cast
+    val data = predictionData
+    if (data != null) {
+        PredictionCard {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.L)) {
+                // 1. 위험도 감지
+                RiskItem(
+                        icon = Icons.Filled.Warning,
+                        title = data.riskAnalysis.title, // "위험도 높음"
+                        description = data.riskAnalysis.message
+                )
+                // 2. 시간대 예측 (유효할 경우만)
+                if (data.usagePrediction.hasPrediction) {
+                    RiskItem(
+                            icon = Icons.Filled.Schedule,
+                            title = "시간대 예측",
+                            description = data.usagePrediction.message
+                    )
+                }
+            }
         }
     }
 }

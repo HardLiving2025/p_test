@@ -31,7 +31,9 @@ import com.example.emotionapp.data.model.GoogleAuthRequest
 import com.example.emotionapp.ui.theme.*
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun LoginScreen(onNavigateToMood: () -> Unit, onNavigateToHome: () -> Unit) {
@@ -85,10 +87,27 @@ fun LoginScreen(onNavigateToMood: () -> Unit, onNavigateToHome: () -> Unit) {
 
                                         // Send ID Token to Backend
                                         try {
+                                                // Fetch FCM Token
+                                                val fcmToken =
+                                                        try {
+                                                                FirebaseMessaging.getInstance()
+                                                                        .token
+                                                                        .await()
+                                                        } catch (e: Exception) {
+                                                                Log.e(
+                                                                        "LoginScreen",
+                                                                        "FCM Token fetch failed",
+                                                                        e
+                                                                )
+                                                                null
+                                                        }
+                                                Log.d("LoginScreen", "FCM Token: $fcmToken")
+
                                                 val response =
                                                         NetworkClient.authApi.loginWithGoogle(
                                                                 GoogleAuthRequest(
-                                                                        id_token = idToken
+                                                                        id_token = idToken,
+                                                                        fcm_token = fcmToken
                                                                 )
                                                         )
 
