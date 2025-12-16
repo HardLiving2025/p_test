@@ -45,9 +45,9 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                                 description = "하루의 기분과 상황을 간단하게 남겨\n사용 패턴의 흐름을 이해할 수 있어요.",
                                 features =
                                         listOf(
-                                                "감정(GOOD / NORMAL / BAD) 기록",
-                                                "상태(BUSY / FREE) 입력",
-                                                "하루 2회, 부담 없는 체크"
+                                                "자유로운 감정, 상태 기록",
+                                                "하루 2회, 부담 없는 체크",
+                                                "개인 맞춤형 사용 패턴 분석",
                                         )
                         ),
                         OnboardingPageData(
@@ -90,7 +90,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                         AnimatedContent(
                                 targetState = currentPage,
                                 transitionSpec = {
-                                        val duration = 300 // 0.3초
+                                        val duration = 1100 // 1.1초 (기존 0.3초 + 0.8초)
                                         val offsetPx =
                                                 with(density) {
                                                         20.dp.roundToPx()
@@ -209,6 +209,7 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                                                 Column(
                                                         modifier =
                                                                 Modifier.fillMaxWidth()
+                                                                        .height(155.dp) // 높이 고정
                                                                         .shadow(
                                                                                 elevation = 8.dp,
                                                                                 shape =

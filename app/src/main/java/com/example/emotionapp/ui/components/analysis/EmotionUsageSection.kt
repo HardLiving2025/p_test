@@ -534,11 +534,35 @@ fun EmotionUsageSection(
                                                         Column(
                                                                 horizontalAlignment = Alignment.End
                                                         ) {
-                                                                val minutes = app.total / 60
-                                                                val seconds = app.total % 60
+                                                                // app.total은 '분' 단위입니다.
+                                                                val totalMinutesVal = app.total
+                                                                val days =
+                                                                        totalMinutesVal / (24 * 60)
+                                                                val hours =
+                                                                        (totalMinutesVal %
+                                                                                (24 * 60)) / 60
+                                                                val mins = totalMinutesVal % 60
+
+                                                                val timeText =
+                                                                        buildString {
+                                                                                if (days > 0)
+                                                                                        append(
+                                                                                                "${days}일 "
+                                                                                        )
+                                                                                if (hours > 0)
+                                                                                        append(
+                                                                                                "${hours}시간 "
+                                                                                        )
+                                                                                if (mins > 0)
+                                                                                        append(
+                                                                                                "${mins}분"
+                                                                                        )
+                                                                        }
+                                                                                .trim()
+                                                                                .ifEmpty { "0분" }
+
                                                                 Text(
-                                                                        text =
-                                                                                "${minutes}분 ${seconds}초",
+                                                                        text = timeText,
                                                                         fontSize = FontSizes.Small,
                                                                         color = PrimaryBrown
                                                                 )
