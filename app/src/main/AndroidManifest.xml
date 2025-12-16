@@ -10,6 +10,11 @@
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
 
+    <!-- ✅ 모든 패키지 조회 권한 (앱 이름 가져오기용) -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
     <application
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
