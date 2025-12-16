@@ -3,6 +3,7 @@ package com.example.emotionapp.ui.screens
 import android.app.Activity
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +21,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
@@ -159,11 +159,10 @@ fun LoginScreen(onLogin: () -> Unit) {
                                         .padding(bottom = 0.dp),
                         contentAlignment = Alignment.Center
                 ) {
-                        Text(
-                                text = "SC",
-                                color = SurfaceWhite,
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Bold
+                        Image(
+                                painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                                contentDescription = "App Icon",
+                                modifier = Modifier.fillMaxSize()
                         )
                 }
 
