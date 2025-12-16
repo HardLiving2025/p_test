@@ -14,10 +14,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,20 +27,7 @@ import com.example.emotionapp.ui.theme.PrimaryBrown
 import com.example.emotionapp.ui.theme.Spacing
 
 @Composable
-fun CurrentPrediction() {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    var predictionData by remember {
-        mutableStateOf<com.example.emotionapp.data.PredictionResponse?>(null)
-    }
-
-    LaunchedEffect(Unit) {
-        com.example.emotionapp.data.PredictionManager.fetchPrediction(context) { result ->
-            predictionData = result
-        }
-    }
-
-    // Local variable for smart cast
-    val data = predictionData
+fun CurrentPrediction(data: com.example.emotionapp.data.PredictionResponse?) {
     if (data != null) {
         PredictionCard {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.L)) {

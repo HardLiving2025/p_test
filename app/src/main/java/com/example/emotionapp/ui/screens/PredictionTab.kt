@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.example.emotionapp.ui.components.prediction.CurrentPrediction
@@ -21,6 +26,20 @@ fun PredictionTab(period: Period) {
     // 오늘의 기분/상태 (실제로는 앱에서 전달받아야 함)
     val todayMood = "😞 나쁨"
     val todayState = "여유로움"
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var predictionData by remember {
+        mutableStateOf<com.example.emotionapp.data.PredictionResponse?>(null)
+    }
+    var isLoading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        isLoading = true
+        com.example.emotionapp.data.PredictionManager.fetchPrediction(context) { result ->
+            predictionData = result
+            isLoading = false
+        }
+    }
 
     Column(
             modifier = Modifier.fillMaxSize().padding(Spacing.ScreenPadding),
@@ -42,13 +61,27 @@ fun PredictionTab(period: Period) {
             )
         }
 
-        // 오늘의 기분/상태
-        TodayMoodState(mood = todayMood, state = todayState)
+        if (isLoading) {
+            androidx.compose.foundation.layout.Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                Text(
+                        text = "계산중입니다...",
+                        fontSize = FontSizes.Title,
+                        color = PrimaryBrown,
+                        fontWeight = FontWeight.SemiBold
+                )
+            }
+        } else if (predictionData != null) {
+            // 오늘의 기분/상태
+            TodayMoodState(mood = todayMood, state = todayState)
 
-        // 위험 예측
-        CurrentPrediction()
+            // 위험 예측
+            CurrentPrediction(predictionData)
 
-        // 추천 행동
-        RecommendedAction()
+            // 추천 행동
+            RecommendedAction(predictionData)
+        }
     }
 }
