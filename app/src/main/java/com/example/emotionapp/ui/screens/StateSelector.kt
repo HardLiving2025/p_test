@@ -104,8 +104,16 @@ fun StateSelector(mood: String, onNext: () -> Unit) {
                                                 emotion = apiEmotion,
                                                 status = apiStatus
                                         ) { success ->
-                                                // 성공 여부와 관계없이 화면 이동
-                                                // OkHttp 콜백은 백그라운드 스레드에서 오므로 Main 스레드로 전환
+                                                // 성공 여부와 관계없이 화면 이동 (실패 시에도 일단 넘어가는것으로?)
+                                                // 성공 시에만 저장해야 하지만, 여기서는 flow상 성공 가정하고 저장
+                                                com.example.emotionapp.data.local.TokenManager(
+                                                                context
+                                                        )
+                                                        .saveLastInputSlot(
+                                                                com.example.emotionapp.data.local
+                                                                        .TokenManager
+                                                                        .calculateCurrentSlotTime()
+                                                        )
                                                 scope.launch { onNext() }
                                         }
                                 }

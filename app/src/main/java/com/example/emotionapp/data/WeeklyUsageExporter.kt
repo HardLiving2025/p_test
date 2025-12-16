@@ -14,7 +14,6 @@ import org.json.JSONObject
 data class AppUsageSession(
         val packageName: String,
         val appName: String, // 패키지명 그대로 사용 (예: com.nhn.android.webtoon)
-        val label: String, // 앱 이름 (예: 네이버 웹툰)
         val startTime: Long,
         val endTime: Long,
         val startTimeStr: String, // "yyyy-MM-dd HH:mm:ss"
@@ -36,8 +35,7 @@ data class DailyUsageSummary(
 data class TimeSlotUsage(
         val date: String,
         val timeSlot: String,
-        val categoryUsage: MutableMap<String, Long> = mutableMapOf(),
-        val appLabels: MutableMap<String, String> = mutableMapOf() // 패키지명 -> 앱이름
+        val categoryUsage: MutableMap<String, Long> = mutableMapOf()
 )
 
 data class WeeklyUsageAnalysis(
@@ -107,7 +105,6 @@ fun readMonthlyUsageJsonFromFile(context: Context): String? =
 private fun getUsageSessions(context: Context, days: Int): List<AppUsageSession> {
     val usageStatsManager =
             context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-    val pm = context.packageManager
 
     val endTime = System.currentTimeMillis()
     val startTime = endTime - days * MILLIS_PER_DAY // 최근 days일
@@ -120,17 +117,6 @@ private fun getUsageSessions(context: Context, days: Int): List<AppUsageSession>
     val event = UsageEvents.Event()
 
     val timeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-    val labelCache = mutableMapOf<String, String>()
-
-    fun getAppLabel(pkg: String): String {
-        return labelCache.getOrPut(pkg) {
-            try {
-                pm.getApplicationInfo(pkg, 0).loadLabel(pm).toString()
-            } catch (e: Exception) {
-                pkg // 실패 시 패키지명 반환
-            }
-        }
-    }
 
     fun addSession(pkg: String, start: Long, end: Long) {
         if (start >= end) return
@@ -140,7 +126,6 @@ private fun getUsageSessions(context: Context, days: Int): List<AppUsageSession>
                 AppUsageSession(
                         packageName = pkg,
                         appName = usageKey,
-                        label = getAppLabel(pkg),
                         startTime = start,
                         endTime = end,
                         startTimeStr = timeFormat.format(Date(start)),
@@ -221,9 +206,6 @@ private fun analyzeUsage(sessions: List<AppUsageSession>): WeeklyUsageAnalysis {
             slotUsage.categoryUsage[session.appName] =
                     slotUsage.categoryUsage.getOrDefault(session.appName, 0L) + durationInSlot
 
-            // 앱 이름 매핑 저장
-            slotUsage.appLabels[session.appName] = session.label
-
             current = chunkEnd
         }
     }
@@ -241,10 +223,6 @@ private fun analyzeUsage(sessions: List<AppUsageSession>): WeeklyUsageAnalysis {
  *     "package": {
  *       "com.nhn.android.webtoon": 123456,
  *       "com.kakao.talk": 78910
- *     },
- *     "app_names": {
- *       "com.nhn.android.webtoon": "네이버 웹툰",
- *       "com.kakao.talk": "카카오톡"
  *     }
  * ```
  * }, ... ]
@@ -264,21 +242,11 @@ private fun analysisToJson(analysis: WeeklyUsageAnalysis): String {
         obj.put("status", statuses.random())
 
         val usageObj = JSONObject()
-        val appNamesObj = JSONObject()
-
-        slot.categoryUsage.entries.sortedByDescending { it.value }.forEach { (pkgName, duration) ->
-            usageObj.put(pkgName, duration)
-
-            // 앱 이름 추가 (있으면)
-            val label = slot.appLabels[pkgName]
-            if (label != null) {
-                appNamesObj.put(pkgName, label)
-            }
+        slot.categoryUsage.entries.sortedByDescending { it.value }.forEach { (appName, duration) ->
+            usageObj.put(appName, duration)
         }
 
         obj.put("package_data", usageObj)
-        obj.put("app_names", appNamesObj)
-
         slotsArray.put(obj)
     }
 

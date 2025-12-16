@@ -21,7 +21,12 @@ fun AppNav() {
 
         composable("login") {
             com.example.emotionapp.ui.screens.LoginScreen(
-                    onLogin = { navController.navigate("mood") }
+                    onNavigateToMood = { navController.navigate("mood") },
+                    onNavigateToHome = {
+                        navController.navigate("home") {
+                            popUpTo("onboarding") { inclusive = true }
+                        }
+                    }
             )
         }
 
@@ -33,7 +38,14 @@ fun AppNav() {
                 route = "state/{mood}",
         ) { backStackEntry ->
             val mood = backStackEntry.arguments?.getString("mood") ?: "normal"
-            StateSelector(mood = mood, onNext = { navController.navigate("home") })
+            StateSelector(
+                    mood = mood,
+                    onNext = {
+                        navController.navigate("home") {
+                            popUpTo("onboarding") { inclusive = true } // 앱 종료 시까지 백스택 정리
+                        }
+                    }
+            )
         }
 
         composable("home") { HomeScreen() }

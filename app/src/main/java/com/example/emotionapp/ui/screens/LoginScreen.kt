@@ -34,7 +34,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(onLogin: () -> Unit) {
+fun LoginScreen(onNavigateToMood: () -> Unit, onNavigateToHome: () -> Unit) {
         val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val tokenManager = TokenManager(context)
@@ -105,8 +105,18 @@ fun LoginScreen(onLogin: () -> Unit) {
                                                                 tokenResponse.access_token
                                                         )
 
-                                                        // Proceed to next screen
-                                                        onLogin()
+                                                        // Proceed to next screen (Check Slot Logic)
+                                                        val dest =
+                                                                tokenManager.getStartDestination()
+                                                        Log.d(
+                                                                "LoginScreen",
+                                                                "Login Success. Destination: $dest"
+                                                        )
+                                                        if (dest == "home") {
+                                                                onNavigateToHome()
+                                                        } else {
+                                                                onNavigateToMood()
+                                                        }
                                                 } else {
                                                         Log.e(
                                                                 "LoginScreen",
