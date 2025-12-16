@@ -17,7 +17,7 @@ import com.example.emotionapp.ui.theme.PrimaryBrown
 import com.example.emotionapp.ui.theme.Spacing
 
 @Composable
-fun PredictionTab() {
+fun PredictionTab(period: Period) {
     // 오늘의 기분/상태 (실제로는 앱에서 전달받아야 함)
     val todayMood = "😞 나쁨"
     val todayState = "여유로움"

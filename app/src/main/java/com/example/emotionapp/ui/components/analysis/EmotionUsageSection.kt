@@ -1,11 +1,13 @@
 package com.example.emotionapp.ui.components.analysis
 
+import android.graphics.drawable.Drawable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,16 +20,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
 import com.example.emotionapp.ui.theme.*
 
 private data class MoodUsage(val moodLabel: String, val sns: Int, val other: Int, val game: Int)
 
 private data class AppDetail(
         val appName: String,
-        val icon: String,
+        val icon: Drawable?,
         val total: Int,
         val good: Int,
         val normal: Int,
@@ -171,31 +175,36 @@ fun EmotionUsageSection(
                                                 val current =
                                                         appMap.getOrPut(pkg) {
                                                                 val icon =
-                                                                        when {
-                                                                                item.appName
-                                                                                        .contains(
-                                                                                                "kakao",
-                                                                                                true
-                                                                                        ) -> "💬"
-                                                                                item.appName
-                                                                                        .contains(
-                                                                                                "insta",
-                                                                                                true
-                                                                                        ) -> "📷"
-                                                                                item.appName
-                                                                                        .contains(
-                                                                                                "tube",
-                                                                                                true
-                                                                                        ) -> "▶️"
-                                                                                item.appName
-                                                                                        .contains(
-                                                                                                "talk",
-                                                                                                true
-                                                                                        ) -> "🎵"
-                                                                                else -> "📱"
+                                                                        try {
+                                                                                context.packageManager
+                                                                                        .getApplicationIcon(
+                                                                                                pkg
+                                                                                        )
+                                                                        } catch (e: Exception) {
+                                                                                null
                                                                         }
+
+                                                                val appNameDisplay =
+                                                                        try {
+                                                                                val appInfo =
+                                                                                        context.packageManager
+                                                                                                .getApplicationInfo(
+                                                                                                        pkg,
+                                                                                                        0
+                                                                                                )
+                                                                                context.packageManager
+                                                                                        .getApplicationLabel(
+                                                                                                appInfo
+                                                                                        )
+                                                                                        .toString()
+                                                                        } catch (
+                                                                                e:
+                                                                                        android.content.pm.PackageManager.NameNotFoundException) {
+                                                                                item.appName
+                                                                        }
+
                                                                 AppDetail(
-                                                                        item.appName,
+                                                                        appNameDisplay,
                                                                         icon,
                                                                         0,
                                                                         0,
@@ -460,11 +469,27 @@ fun EmotionUsageSection(
                                                                                 ),
                                                                 contentAlignment = Alignment.Center
                                                         ) {
-                                                                Text(
-                                                                        text = app.icon,
-                                                                        fontSize =
-                                                                                FontSizes.SemiBold
-                                                                )
+                                                                if (app.icon != null) {
+                                                                        Image(
+                                                                                bitmap =
+                                                                                        app.icon
+                                                                                                .toBitmap()
+                                                                                                .asImageBitmap(),
+                                                                                contentDescription =
+                                                                                        app.appName,
+                                                                                modifier =
+                                                                                        Modifier.size(
+                                                                                                32.dp
+                                                                                        )
+                                                                        )
+                                                                } else {
+                                                                        Text(
+                                                                                text = "📱",
+                                                                                fontSize =
+                                                                                        FontSizes
+                                                                                                .SemiBold
+                                                                        )
+                                                                }
                                                         }
 
                                                         // 이름 + 막대

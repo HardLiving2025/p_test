@@ -77,9 +77,6 @@ object ServerUploadManager {
             jsonString: String,
             onResult: (Boolean, String) -> Unit
     ) {
-        // 전송 데이터 로그 출력
-        Log.d("ServerUpload", "Uploading to $url\nPayload: $jsonString")
-
         val token = com.example.emotionapp.data.local.TokenManager(context).getAccessToken()
         val requestBody = jsonString.toRequestBody(JSON_MEDIA_type)
         val request =

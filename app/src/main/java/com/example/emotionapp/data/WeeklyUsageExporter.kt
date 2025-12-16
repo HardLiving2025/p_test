@@ -58,7 +58,7 @@ private const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000L
 fun exportUsageJson(context: Context, days: Int): String {
     val sessions = getUsageSessions(context, days)
     val analysis = analyzeUsage(sessions)
-    return analysisToJson(context, analysis)
+    return analysisToJson(analysis)
 }
 
 /** 기존 이름 유지용 래퍼 – “주간” */
@@ -221,29 +221,14 @@ private fun analyzeUsage(sessions: List<AppUsageSession>): WeeklyUsageAnalysis {
  *     "usage_date": "2025-12-11",
  *     "time_slot": "14:00",
  *     "package": {
- *       "네이버 웹툰": 123456,
- *       "카카오톡": 78910
+ *       "com.nhn.android.webtoon": 123456,
+ *       "com.kakao.talk": 78910
  *     }
  * ```
  * }, ... ]
  */
-private fun analysisToJson(context: Context, analysis: WeeklyUsageAnalysis): String {
+private fun analysisToJson(analysis: WeeklyUsageAnalysis): String {
     val slotsArray = JSONArray()
-    val packageManager = context.packageManager
-
-    // 캐시를 사용하여 앱 이름 조회 성능 최적화
-    val appNameCache = mutableMapOf<String, String>()
-
-    fun getAppName(packageName: String): String {
-        return appNameCache.getOrPut(packageName) {
-            try {
-                val appInfo = packageManager.getApplicationInfo(packageName, 0)
-                packageManager.getApplicationLabel(appInfo).toString()
-            } catch (e: Exception) {
-                packageName // 앱 이름을 찾을 수 없으면 패키지명 사용
-            }
-        }
-    }
 
     analysis.timeSlots.forEach { slot ->
         val obj = JSONObject()
@@ -257,15 +242,8 @@ private fun analysisToJson(context: Context, analysis: WeeklyUsageAnalysis): Str
         obj.put("status", statuses.random())
 
         val usageObj = JSONObject()
-        slot.categoryUsage.entries.sortedByDescending { it.value }.forEach { (packageName, duration)
-            ->
-            val appName = getAppName(packageName)
-            // 이미 동일한 앱 이름이 있다면 시간을 합산 (거의 없을 수 있지만 안전장치)
-            if (usageObj.has(appName)) {
-                usageObj.put(appName, usageObj.getLong(appName) + duration)
-            } else {
-                usageObj.put(appName, duration)
-            }
+        slot.categoryUsage.entries.sortedByDescending { it.value }.forEach { (appName, duration) ->
+            usageObj.put(appName, duration)
         }
 
         obj.put("package_data", usageObj)
