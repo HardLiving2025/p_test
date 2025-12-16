@@ -40,11 +40,25 @@ fun MoodStateUsageSection(period: com.example.emotionapp.ui.screens.Period) {
                                                         result.month1
                                         }
 
+                                val dayDivisor =
+                                        when (period) {
+                                                com.example.emotionapp.ui.screens.Period
+                                                        .YESTERDAY -> 1
+                                                com.example.emotionapp.ui.screens.Period.WEEK -> 7
+                                                com.example.emotionapp.ui.screens.Period
+                                                        .TWO_WEEKS -> 14
+                                                com.example.emotionapp.ui.screens.Period.MONTH -> 30
+                                        }
+
                                 val processed = mutableMapOf<String, Map<String, Long>>()
                                 periodKeyMap.forEach { (emotion, statusMap) ->
                                         val newMap = mutableMapOf<String, Long>()
                                         statusMap.forEach { (status, timeMs) ->
-                                                newMap[status] = timeMs / (1000 * 60) // 분 단위 변환
+                                                newMap[status] =
+                                                        timeMs /
+                                                                (1000 * 60) /
+                                                                3 /
+                                                                dayDivisor // 분 단위 변환
                                         }
                                         processed[emotion] = newMap
                                 }
@@ -57,8 +71,13 @@ fun MoodStateUsageSection(period: com.example.emotionapp.ui.screens.Period) {
 
         // 최대값 계산 (Y축 스케일)
         val allValues = moodStatusData?.values?.flatMap { it.values } ?: emptyList()
-        val maxVal = allValues.maxOrNull()?.coerceAtLeast(100L) ?: 100L
-        val step = maxVal / 4
+        val maxValComp = allValues.maxOrNull() ?: 1L
+        // 최소 1은 보장 (분모 0 방지), 값이 작으면 그에 맞게, 0이면 기본 60, 등
+        // 하지만 사용자 요청은 "유동적". 데이터가 10이면 10이 max.
+        val maxVal = if (maxValComp == 0L) 60L else maxValComp
+
+        // 단계별 값 (4등분)
+        // 0부터 maxVal까지 4단계로 표시
 
         // 색상 정의
         val busyColor = Color(0xFF3C2F2F)
@@ -87,9 +106,11 @@ fun MoodStateUsageSection(period: com.example.emotionapp.ui.screens.Period) {
                                 verticalArrangement = Arrangement.SpaceBetween,
                                 horizontalAlignment = Alignment.End
                         ) {
-                                (4 downTo 0).forEach { i ->
+                                val steps = 4
+                                (steps downTo 0).forEach { i ->
+                                        val value = (maxVal * i / steps)
                                         Text(
-                                                text = "${step * i}",
+                                                text = "$value",
                                                 fontSize = FontSizes.Small,
                                                 color = PrimaryBrown.copy(alpha = 0.7f),
                                                 textAlign = TextAlign.End,

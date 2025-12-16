@@ -79,13 +79,23 @@ fun TimeUsageLineChart(data: List<SlotUsageAverage>) {
                         val chartWidth = width - chartPaddingLeft
                         val chartHeight = height - chartPaddingBottom
 
-                        // Y축 (0 ~ 30분)
-                        val maxY = 30f
-                        val yStep = 10f
+                        // Y축 (동적 최대값)
+                        // 모든 데이터 중 가장 큰 값을 찾음 (분 단위)
+                        val maxSns = aggregatedData.maxOfOrNull { it.sns } ?: 0L
+                        val maxGame = aggregatedData.maxOfOrNull { it.game } ?: 0L
+                        val maxOther = aggregatedData.maxOfOrNull { it.other } ?: 0L
+                        val absoluteMaxMs = maxOf(maxSns, maxGame, maxOther)
+                        val absoluteMaxMin = absoluteMaxMs / 1000f / 60f
+
+                        // 최소 20분은 보장, 데이터가 더 크면 그 값 사용
+                        val maxY = if (absoluteMaxMin < 20f) 20f else absoluteMaxMin
+
+                        // 4등분 (20분일 경우: 0, 5, 10, 15, 20)
+                        val steps = 4
 
                         // ───────────── Y축 그리드 + 레이블 ─────────────
-                        for (i in 0..3) { // 0, 10, 20, 30
-                                val value = i * yStep
+                        for (i in 0..steps) {
+                                val value = maxY * (i.toFloat() / steps)
                                 val y = chartHeight - (value / maxY * chartHeight)
 
                                 // 점선 그리드
@@ -127,33 +137,44 @@ fun TimeUsageLineChart(data: List<SlotUsageAverage>) {
                                 )
                         }
 
-                        // X축: 한 점이 2시간 → 4시간마다 라벨 = 2칸마다
-                        val labelInterval = 2
+                        // X축: 하드코딩된 라벨 (00, 04, 08, 12, 16, 20)
+                        val fixedLabels = listOf("0시", "4시", "8시", "12시", "16시", "20시")
                         val xStep = chartWidth / (aggregatedData.size - 1).coerceAtLeast(1)
 
-                        aggregatedData.forEachIndexed { index, item ->
-                                if (index % labelInterval != 0) return@forEachIndexed
+                        fixedLabels.forEachIndexed { i, label ->
+                                // aggregatedData는 2시간 단위 (00-02, 02-04, 04-06...)
+                                // 00시 -> index 0 (00-02)
+                                // 04시 -> index 2 (04-06)
+                                // 08시 -> index 4 (08-10)
+                                // ...
+                                // 20시 -> index 10 (20-22)
+                                val dataIndex = i * 2
 
-                                val x = chartPaddingLeft + (index * xStep)
-                                val label = item.startTime.substring(0, 2) // "00:00" -> "00"
+                                if (dataIndex < aggregatedData.size) {
+                                        val x = chartPaddingLeft + (dataIndex * xStep)
 
-                                val textLayoutResult =
-                                        textMeasurer.measure(
-                                                text = label,
-                                                style =
-                                                        androidx.compose.ui.text.TextStyle(
-                                                                color = PrimaryBrown,
-                                                                fontSize = FontSizes.Small
+                                        val textLayoutResult =
+                                                textMeasurer.measure(
+                                                        text = label,
+                                                        style =
+                                                                androidx.compose.ui.text.TextStyle(
+                                                                        color = PrimaryBrown,
+                                                                        fontSize = FontSizes.Small
+                                                                )
+                                                )
+                                        drawText(
+                                                textLayoutResult = textLayoutResult,
+                                                topLeft =
+                                                        Offset(
+                                                                x =
+                                                                        x -
+                                                                                textLayoutResult
+                                                                                        .size
+                                                                                        .width / 2,
+                                                                y = chartHeight + 10.dp.toPx()
                                                         )
                                         )
-                                drawText(
-                                        textLayoutResult = textLayoutResult,
-                                        topLeft =
-                                                Offset(
-                                                        x = x - textLayoutResult.size.width / 2,
-                                                        y = chartHeight + 10.dp.toPx()
-                                                )
-                                )
+                                }
                         }
 
                         // ───────────── 라인 그리기 함수 ─────────────
@@ -164,10 +185,11 @@ fun TimeUsageLineChart(data: List<SlotUsageAverage>) {
                                 val points = mutableListOf<Offset>()
 
                                 values.forEachIndexed { index, valueMs ->
-                                        val valueMin =
-                                                (valueMs / 1000f / 60f).coerceAtMost(
-                                                        30f
-                                                ) // ms → 분, 최대 30분
+                                        // ms → 분
+                                        // maxY가 dynamic이므로 coerceAtMost 불필요 (하지만 안전장치로 유지?)
+                                        // 아니면 그래프 밖으로 나가지 않게 min(val, maxY)
+                                        val valueMin = (valueMs / 1000f / 60f).coerceAtMost(maxY)
+
                                         val x = chartPaddingLeft + (index * xStep)
                                         val y = chartHeight - (valueMin / maxY * chartHeight)
 

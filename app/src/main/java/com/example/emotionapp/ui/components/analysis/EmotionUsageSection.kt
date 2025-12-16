@@ -228,7 +228,10 @@ fun EmotionUsageSection(
                                 }
 
                                 appDetailData =
-                                        appMap.values.sortedByDescending { it.total }.toList()
+                                        appMap.values
+                                                .sortedByDescending { it.total }
+                                                .take(5)
+                                                .toList()
                         }
                 }
         }
@@ -251,21 +254,30 @@ fun EmotionUsageSection(
 
                 Spacer(modifier = Modifier.height(Spacing.M))
 
+                val maxMoodUsage =
+                        remember(moodData) {
+                                moodData.maxOfOrNull { maxOf(it.sns, it.game, it.other) } ?: 60
+                        }
+                val chartMax = if (maxMoodUsage == 0) 60 else maxMoodUsage
+
                 // 감정별 막대 그래프 (Canvas + Layout)
                 Row(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-                        // Y축 레이블 (0 ~ 100)
+                        // Y축 레이블 (Dynamic)
                         Column(
                                 modifier = Modifier.fillMaxHeight(),
                                 verticalArrangement = Arrangement.SpaceBetween,
                                 horizontalAlignment = Alignment.End
                         ) {
-                                listOf("100", "75", "50", "25", "0").forEach { label ->
+                                // 4등분 (100%, 75%, 50%, 25%, 0%)
+                                val steps = 4
+                                for (i in steps downTo 0) {
+                                        val value = (chartMax * (i.toFloat() / steps)).toInt()
                                         Text(
-                                                text = label,
+                                                text = value.toString(),
                                                 fontSize = FontSizes.Small,
                                                 color = PrimaryBrown.copy(alpha = 0.7f),
                                                 textAlign = TextAlign.End,
-                                                modifier = Modifier.width(24.dp)
+                                                modifier = Modifier.width(32.dp) // 너비 약간 증가
                                         )
                                 }
                         }
@@ -328,16 +340,19 @@ fun EmotionUsageSection(
                                                                 // SNS (PrimaryBrown)
                                                                 BarItem(
                                                                         value = item.sns,
+                                                                        max = chartMax,
                                                                         color = PrimaryBrown
                                                                 )
                                                                 // 게임 (SecondaryBeige) - 이미지상 가운데
                                                                 BarItem(
                                                                         value = item.game,
+                                                                        max = chartMax,
                                                                         color = SecondaryBeige
                                                                 )
                                                                 // 기타 (HighlightOrange) - 이미지상 오른쪽
                                                                 BarItem(
                                                                         value = item.other,
+                                                                        max = chartMax,
                                                                         color = HighlightOrange
                                                                 )
                                                         }
