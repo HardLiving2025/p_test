@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.emotionapp.data.NotificationManager
-import com.example.emotionapp.ui.components.DailyInsightPopup
 import com.example.emotionapp.ui.theme.*
 import com.example.emotionapp.utils.NotificationHelper
 import com.example.emotionapp.utils.PermissionUtils
@@ -168,19 +167,6 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                                                         NotificationTab(period = selectedPeriod)
                                         }
                                 }
-                        }
-
-                        // 팝업 순차 표시
-                        if (showInitialPopup) {
-                                com.example.emotionapp.ui.components.InitialPull1MonthDataPopup(
-                                        onClose = {
-                                                showInitialPopup = false
-                                                showInsightPopup = true
-                                        },
-                                        onRefreshNeeded = { refreshTrigger++ }
-                                )
-                        } else if (showInsightPopup) {
-                                DailyInsightPopup(onClose = { showInsightPopup = false })
                         }
                 }
         }

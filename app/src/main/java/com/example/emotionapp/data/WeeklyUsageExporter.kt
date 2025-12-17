@@ -83,6 +83,10 @@ fun saveWeeklyUsageJsonToFile(context: Context, fileName: String = "usage_week.j
 fun saveMonthlyUsageJsonToFile(context: Context, fileName: String = "usage_month.json") =
         saveUsageJsonToFile(context, days = 30, fileName = fileName)
 
+/** 편의 함수 – 10일치 데이터를 받아와야한다는 화면용 */
+fun save10DaysUsageJsonToFile(context: Context, fileName: String = "usage_10_days.json") =
+        saveUsageJsonToFile(context, days = 10, fileName = fileName)
+
 fun readUsageJsonFromFile(context: Context, fileName: String): String? {
     return try {
         context.openFileInput(fileName).bufferedReader().use { it.readText() }

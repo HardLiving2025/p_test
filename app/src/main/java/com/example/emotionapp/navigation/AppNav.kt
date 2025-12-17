@@ -20,7 +20,7 @@ fun AppNav() {
         }
 
         composable("login") {
-            com.example.emotionapp.ui.screens.LoginScreen(
+            com.example.emotionapp.ui.screens.RequestScreen(
                     onNavigateToMood = { navController.navigate("mood") },
                     onNavigateToHome = {
                         navController.navigate("home") {
