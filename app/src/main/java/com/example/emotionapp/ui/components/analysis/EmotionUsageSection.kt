@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.emotionapp.ui.theme.*
 
-private data class MoodUsage(val moodLabel: String, val sns: Int, val other: Int, val game: Int)
-
 private data class AppDetail(
         val appName: String,
         val icon: Drawable?,
@@ -534,7 +532,7 @@ fun EmotionUsageSection(
                                                                                                 Modifier.weight(
                                                                                                                 badPercent
                                                                                                                         .coerceAtLeast(
-                                                                                                                                0.1f
+                                                                                                                                0.01f
                                                                                                                         )
                                                                                                         )
                                                                                                         .fillMaxHeight()
@@ -547,7 +545,7 @@ fun EmotionUsageSection(
                                                                                                 Modifier.weight(
                                                                                                                 normalPercent
                                                                                                                         .coerceAtLeast(
-                                                                                                                                0.1f
+                                                                                                                                0.01f
                                                                                                                         )
                                                                                                         )
                                                                                                         .fillMaxHeight()
@@ -560,7 +558,7 @@ fun EmotionUsageSection(
                                                                                                 Modifier.weight(
                                                                                                                 goodPercent
                                                                                                                         .coerceAtLeast(
-                                                                                                                                0.1f
+                                                                                                                                0.01f
                                                                                                                         )
                                                                                                         )
                                                                                                         .fillMaxHeight()
@@ -574,6 +572,7 @@ fun EmotionUsageSection(
 
                                                         // 시간 + %
                                                         Column(
+                                                                modifier = Modifier.width(100.dp),
                                                                 horizontalAlignment = Alignment.End
                                                         ) {
                                                                 // app.total은 '분' 단위입니다.
@@ -606,7 +605,9 @@ fun EmotionUsageSection(
                                                                 Text(
                                                                         text = timeText,
                                                                         fontSize = FontSizes.Small,
-                                                                        color = PrimaryBrown
+                                                                        color = PrimaryBrown,
+                                                                        maxLines = 1,
+                                                                        softWrap = false
                                                                 )
                                                                 Text(
                                                                         text =
@@ -619,6 +620,20 @@ fun EmotionUsageSection(
                                                                 )
                                                         }
                                                 }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(Spacing.L))
+
+                                        // 그래프 맨 아래 범례 추가
+                                        Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.Center
+                                        ) {
+                                                LegendItem(color = SecondaryBeige, label = "좋음")
+                                                Spacer(modifier = Modifier.width(Spacing.L))
+                                                LegendItem(color = HighlightOrange, label = "보통")
+                                                Spacer(modifier = Modifier.width(Spacing.L))
+                                                LegendItem(color = PrimaryBrown, label = "나쁨")
                                         }
                                 }
                         }

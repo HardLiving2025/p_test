@@ -33,9 +33,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.emotionapp.data.NotificationManager
+import com.example.emotionapp.ui.components.analysis.DailyInsightPopup
 import com.example.emotionapp.ui.theme.*
-import com.example.emotionapp.utils.NotificationHelper
 import com.example.emotionapp.utils.PermissionUtils
 
 /** 탭 종류 */
@@ -63,28 +62,11 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
 
         val context = LocalContext.current
 
-        val fetchAndShowNotification = {
-                NotificationHelper.createNotificationChannel(context)
-                NotificationManager.fetchNotificationMessage(
-                        context,
-                        onResult = { response ->
-                                NotificationHelper.showNotification(
-                                        context,
-                                        response.risk_level,
-                                        response.body
-                                )
-                        },
-                        onError = { /* Handle error or log */}
-                )
-        }
-
         val launcher =
                 rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission(),
                         onResult = { isGranted ->
-                                if (isGranted) {
-                                        fetchAndShowNotification()
-                                } else {
+                                if (!isGranted) {
                                         android.widget.Toast.makeText(
                                                         context,
                                                         "알림 권한이 거부되었습니다.\n알림 탭에서 변경 가능합니다.",
@@ -96,22 +78,26 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                 )
 
         LaunchedEffect(Unit) {
-                if (PermissionUtils.hasNotificationPermission(context)) {
-                        fetchAndShowNotification()
-                } else {
+                // 권한이 없으면 요청 (Android 13+) - 알림을 직접 보내진 않음
+                if (!PermissionUtils.hasNotificationPermission(context)) {
                         if (android.os.Build.VERSION.SDK_INT >=
                                         android.os.Build.VERSION_CODES.TIRAMISU
                         ) {
                                 launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        } else {
-                                fetchAndShowNotification()
                         }
                 }
         }
 
-        // 팝업 순서 제어: InitialPull1MonthDataPopup -> DailyInsightPopup
-        var showInitialPopup by remember { mutableStateOf(true) }
-        var showInsightPopup by remember { mutableStateOf(false) } // 초기에는 false
+        // 초기 팝업 표시 (Daily Insight) - 하루에 한 번만
+        val prefs = remember {
+                context.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+        }
+        val today = remember {
+                java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                        .format(java.util.Date())
+        }
+        val lastPopupDate = remember { prefs.getString("last_popup_date", "") }
+        var showInsightPopup by remember { mutableStateOf(today != lastPopupDate) }
 
         val tabs =
                 listOf(
@@ -168,6 +154,16 @@ fun HomeScreen(onLogout: () -> Unit = {}) {
                                         }
                                 }
                         }
+                }
+                // 팝업 표시
+                if (showInsightPopup) {
+                        DailyInsightPopup(
+                                onClose = {
+                                        showInsightPopup = false
+                                        // 오늘 날짜 저장 (내일까지 팝업 안 보이게)
+                                        prefs.edit().putString("last_popup_date", today).apply()
+                                }
+                        )
                 }
         }
 }

@@ -26,7 +26,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.example.emotionapp.data.NotificationManager
 import com.example.emotionapp.ui.components.notification.NotificationItem
 import com.example.emotionapp.ui.components.notification.NotificationItemData
-import com.example.emotionapp.ui.components.notification.NotificationList
 import com.example.emotionapp.ui.components.notification.NotificationPermissionToggle
 import com.example.emotionapp.ui.theme.FontSizes
 import com.example.emotionapp.ui.theme.PrimaryBrown
@@ -37,9 +36,6 @@ import com.example.emotionapp.utils.PermissionUtils
 @Composable
 fun NotificationTab(period: Period) {
         // 섹션 확장 상태
-        var expandedAll by remember { mutableStateOf(false) }
-        var expandedChecked by remember { mutableStateOf(false) }
-        var expandedIgnored by remember { mutableStateOf(false) }
 
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -59,14 +55,6 @@ fun NotificationTab(period: Period) {
         }
 
         var notifications by remember { mutableStateOf<List<NotificationItemData>>(emptyList()) }
-
-        var allNotificationsList by remember {
-                mutableStateOf<List<NotificationItemData>>(emptyList())
-        }
-
-        // Status lists kept empty for now until API supports status filtering
-        val checkedNotificationsList = emptyList<NotificationItemData>()
-        val ignoredNotificationsList = emptyList<NotificationItemData>()
 
         LaunchedEffect(Unit) {
                 NotificationManager.fetchRecentNotifications(
@@ -95,7 +83,7 @@ fun NotificationTab(period: Period) {
                                                         )
                                         }
                                 notifications = mappedList
-                                allNotificationsList = mappedList
+                                notifications = mappedList
                         },
                         onError = {
                                 // Handle error if needed, for now just log
@@ -182,46 +170,6 @@ fun NotificationTab(period: Period) {
                                         color = PrimaryBrown.copy(alpha = 0.7f),
                                         modifier = Modifier.fillMaxWidth().padding(top = Spacing.M),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                )
-                        }
-
-                        // 알림 목록 (확장 가능)
-                        Column(
-                                modifier =
-                                        Modifier.fillMaxWidth()
-                                                .clip(RoundedCornerShape(Spacing.M))
-                                                .background(SurfaceWhite)
-                                                .padding(Spacing.CardInner),
-                                verticalArrangement = Arrangement.spacedBy(Spacing.L)
-                        ) {
-                                Text(
-                                        text = "알림 목록",
-                                        fontSize = FontSizes.SemiBold,
-                                        color = PrimaryBrown
-                                )
-
-                                NotificationList(
-                                        title = "전체 알림",
-                                        notifications = allNotificationsList,
-                                        isExpanded = expandedAll,
-                                        onToggle = { expandedAll = !expandedAll },
-                                        description = "받은 모든 알림의 목록입니다."
-                                )
-
-                                NotificationList(
-                                        title = "확인한 알림",
-                                        notifications = checkedNotificationsList,
-                                        isExpanded = expandedChecked,
-                                        onToggle = { expandedChecked = !expandedChecked },
-                                        description = "알림을 확인하고 적절히 대응한 알림 목록입니다."
-                                )
-
-                                NotificationList(
-                                        title = "무시한 알림",
-                                        notifications = ignoredNotificationsList,
-                                        isExpanded = expandedIgnored,
-                                        onToggle = { expandedIgnored = !expandedIgnored },
-                                        description = "알림을 받았는데도 무시해버린 알림 목록입니다."
                                 )
                         }
                 }

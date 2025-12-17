@@ -63,4 +63,40 @@ object NotificationHelper {
 
         with(NotificationManagerCompat.from(context)) { notify(NOTIFICATION_ID, builder.build()) }
     }
+
+    fun scheduleDailyNotification(context: Context) {
+        val alarmManager =
+                context.getSystemService(Context.ALARM_SERVICE) as? android.app.AlarmManager
+                        ?: return
+        val intent = android.content.Intent(context, DailyNotificationReceiver::class.java)
+
+        val pendingIntent =
+                android.app.PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        intent,
+                        android.app.PendingIntent.FLAG_UPDATE_CURRENT or
+                                android.app.PendingIntent.FLAG_IMMUTABLE
+                )
+
+        val calendar =
+                java.util.Calendar.getInstance().apply {
+                    // 매일 23시에 알림 설정
+                    set(java.util.Calendar.HOUR_OF_DAY, 23)
+                    set(java.util.Calendar.MINUTE, 0)
+                    set(java.util.Calendar.SECOND, 0)
+                }
+
+        // 이미 시간이 지났다면 내일 11시로 설정
+        if (calendar.timeInMillis <= System.currentTimeMillis()) {
+            calendar.add(java.util.Calendar.DAY_OF_YEAR, 1)
+        }
+
+        alarmManager.setRepeating(
+                android.app.AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                android.app.AlarmManager.INTERVAL_DAY,
+                pendingIntent
+        )
+    }
 }

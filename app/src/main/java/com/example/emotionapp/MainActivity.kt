@@ -22,5 +22,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        // 알림 채널 생성 (Android 8.0+ 필수)
+        com.example.emotionapp.utils.NotificationHelper.createNotificationChannel(this)
+
+        // 매일 알림 스케줄링
+        com.example.emotionapp.utils.NotificationHelper.scheduleDailyNotification(this)
     }
 }

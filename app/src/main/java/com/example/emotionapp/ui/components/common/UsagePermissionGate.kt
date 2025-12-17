@@ -13,9 +13,8 @@ import com.example.emotionapp.utils.PermissionUtils
 @Composable
 fun UsagePermissionGate(content: @Composable () -> Unit) {
     val context = LocalContext.current
-    var hasPermission by remember {
-        mutableStateOf(PermissionUtils.hasUsageStatsPermission(context))
-    }
+
+    var hasPermission by remember { mutableStateOf(true) }
 
     if (hasPermission) {
         // ✅ 권한 있으면 원래 앱 콘텐츠 보여주기
@@ -24,7 +23,7 @@ fun UsagePermissionGate(content: @Composable () -> Unit) {
         // ⚠️ 권한 없으면 안내 화면
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("스크린 Comma가 사용 기록에 접근해야\n정확한 사용 패턴 분석이 가능해요.")
+                Text("Screen Comma가 사용 기록에 접근해야\n정확한 사용 패턴 분석이 가능해요.")
                 Spacer(Modifier.height(16.dp))
                 Button(
                         onClick = {

@@ -13,8 +13,8 @@ class TokenManager(context: Context) {
         private const val KEY_LAST_INPUT_SLOT = "last_input_slot_time"
 
         /**
-         * 현재 시간 기준 유효 슬롯(타임스탬프) 계산 06:00 ~ 17:59 -> 오늘 06:00 18:00 ~ 05:59 -> (오늘 18:00) 또는 (어제
-         * 18:00) 예: 오늘 19시 -> 오늘 18시 예: 내일 04시 -> 오늘 18시
+         * 현재 시간 기준 유효 슬롯(타임스탬프) 계산 세션 1: 08:00 ~ 17:59 -> 오늘 08:00 세션 2: 18:00 ~ 다음날 07:59 -> 오늘/어제
+         * 18:00 예: 오늘 19시 -> 오늘 18시 예: 내일 04시 -> 오늘 18시
          */
         fun calculateCurrentSlotTime(): Long {
             val cal = java.util.Calendar.getInstance()
@@ -25,13 +25,13 @@ class TokenManager(context: Context) {
             cal.set(java.util.Calendar.SECOND, 0)
             cal.set(java.util.Calendar.MILLISECOND, 0)
 
-            if (hour in 6..17) {
-                // 06:00 ~ 17:59 -> 06:00
-                cal.set(java.util.Calendar.HOUR_OF_DAY, 6)
+            if (hour in 8..17) {
+                // 08:00 ~ 17:59 -> 08:00 (세션 1)
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 8)
             } else {
-                // 18:00 ~ 05:59 -> 18:00 (전날일 수도 있음)
-                if (hour < 6) {
-                    // 새벽 00시 ~ 05시 -> 전날 18시
+                // 18:00 ~ 07:59 -> 18:00 (세션 2, 전날일 수도 있음)
+                if (hour < 8) {
+                    // 새벽 00시 ~ 07:59 -> 전날 18시
                     cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
                 }
                 // 18시로 설정
@@ -65,10 +65,10 @@ class TokenManager(context: Context) {
     }
 
     /**
-     * 앱 시작 시 이동할 목적지 결정 토큰 없음 -> onboarding 토큰 있음 + 이번 슬롯 입력 완료 -> home 토큰 있음 + 입력 필요 -> mood
-     * (LoginScreen은 자동 로그인 처리 가정 - 여기서는 'mood'로 바로 가거나 'login' 거쳐감)
-     * * LoginScreen에서 토큰 있으면 바로 mood로 가는 로직이 있다면 'login'으로 보내도 됨.
-     * * 요구사항: "입력 된 상태일때는 ... 다음 단계로 바로 넘어가게"
+     * 앱 시작 시 이동할 목적지 결정
+     * - 토큰 없음 -> onboarding (첫 로그인)
+     * - 토큰 있음 + 이번 세션 입력 완료 -> home
+     * - 토큰 있음 + 입력 필요 -> mood (감정/상태 입력)
      */
     fun getStartDestination(): String {
         val token = getAccessToken()
@@ -85,14 +85,7 @@ class TokenManager(context: Context) {
             return "home"
         }
 
-        // 로그인 되어 있고 입력 안했으면 Login (자동 로그인 체크 후 Mood로 이동될 것임)
-        // 또는 바로 'mood'로 보낼 수도 있지만, User 정보를 로드해야 할 수도 있으니
-        // 안전하게 'login'으로 보내고 LoginScreen에서 토큰 체크 후 skip 하게 하는 게 일반적.
-        // 하지만 요구사항상 "입력창이 바로 안뜨고"라고 했으므로,
-        // 입력 해야하면 'mood' (로그인 상태 가정), 안해도 되면 'home'.
-        // LoginScreen이 "이미 로그인됨 -> navigate" 로직이 있다면 'login'이 맞음.
-        // 여기서는 안전하게 'login'을 리턴하고, LoginScreen에서 분기하도록 하거나,
-        // AppNav에서 처리. 여기서는 단순 판단 로직만 제공.
-        return "login_gate"
+        // 토큰 있고 입력 안했으면 감정 입력 화면으로 직행
+        return "mood"
     }
 }

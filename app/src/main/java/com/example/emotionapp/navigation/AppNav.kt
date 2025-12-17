@@ -11,8 +11,13 @@ import com.example.emotionapp.ui.screens.StateSelector
 @Composable
 fun AppNav() {
     val navController = rememberNavController()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val tokenManager = com.example.emotionapp.data.local.TokenManager(context)
 
-    NavHost(navController = navController, startDestination = "onboarding") {
+    // 동적 시작 목적지: 토큰과 세션 체크
+    val startDestination = tokenManager.getStartDestination()
+
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("onboarding") {
             com.example.emotionapp.ui.screens.OnboardingScreen(
                     onComplete = { navController.navigate("login") }
@@ -55,14 +60,8 @@ fun AppNav() {
             HomeScreen(
                     onLogout = {
                         tokenManager.clearTokens()
-                        navController.navigate("login") {
-                            popUpTo("home") { inclusive = true }
-                            popUpTo("login") { inclusive = true }
-                            // 완전히 앱 초기 상태로 돌아가려면 popUpTo(0) 또는 그래프 시작점
-                            popUpTo(navController.graph.id) { inclusive = true }
-                        }
-                        // 네비게이션을 login으로 하고, 백스택을 정리
-                        navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                        // 로그아웃 시 온보딩부터 다시 시작
+                        navController.navigate("onboarding") { popUpTo(0) { inclusive = true } }
                     }
             )
         }
