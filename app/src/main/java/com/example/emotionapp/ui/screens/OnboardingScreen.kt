@@ -55,11 +55,11 @@ fun OnboardingScreen(onComplete: () -> Unit) {
                         ),
                         OnboardingPageData(
                                 title = "아무 때나\n개입하지 않습니다",
-                                description = "가장 받아들이기 쉬운 순간에만\n필요한 알림을 전달합니다.",
+                                description = "흐름이 흐트러질 때만\n조용히 신호를 보냅니다.",
                                 features =
                                         listOf(
-                                                "피곤하거나 집중이 흐트러질 때",
-                                                "사용이 길어질 때만 개입",
+                                                "하루 끝, 나도 모르게 집중이 풀릴 때",
+                                                "필요한 순간에만 조용히 개입",
                                                 "최소한의 알림, 낮은 거부감"
                                         )
                         ),

@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
                 Surface {
                     // ✅ 여기서 권한 체크 + 설정 화면 이동 처리
                     UsagePermissionGate {
-                        AppNav()   // 원래 앱 네비게이션
+                        AppNav() // 원래 앱 네비게이션
                     }
                 }
             }

@@ -1,5 +1,8 @@
 package com.example.emotionapp.ui.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,9 +31,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.emotionapp.data.NotificationManager
 import com.example.emotionapp.ui.components.DailyInsightPopup
 import com.example.emotionapp.ui.theme.*
+import com.example.emotionapp.utils.NotificationHelper
+import com.example.emotionapp.utils.PermissionUtils
 
 /** 탭 종류 */
 enum class HomeTab {
@@ -53,6 +61,54 @@ data class BottomTab(val id: HomeTab, val label: String, val icon: ImageVector)
 fun HomeScreen(onLogout: () -> Unit = {}) {
         var activeTab by remember { mutableStateOf(HomeTab.ANALYSIS) }
         var selectedPeriod by remember { mutableStateOf(Period.YESTERDAY) }
+
+        val context = LocalContext.current
+
+        val fetchAndShowNotification = {
+                NotificationHelper.createNotificationChannel(context)
+                NotificationManager.fetchNotificationMessage(
+                        context,
+                        onResult = { response ->
+                                NotificationHelper.showNotification(
+                                        context,
+                                        response.risk_level,
+                                        response.body
+                                )
+                        },
+                        onError = { /* Handle error or log */}
+                )
+        }
+
+        val launcher =
+                rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = { isGranted ->
+                                if (isGranted) {
+                                        fetchAndShowNotification()
+                                } else {
+                                        android.widget.Toast.makeText(
+                                                        context,
+                                                        "알림 권한이 거부되었습니다.\n알림 탭에서 변경 가능합니다.",
+                                                        android.widget.Toast.LENGTH_LONG
+                                                )
+                                                .show()
+                                }
+                        }
+                )
+
+        LaunchedEffect(Unit) {
+                if (PermissionUtils.hasNotificationPermission(context)) {
+                        fetchAndShowNotification()
+                } else {
+                        if (android.os.Build.VERSION.SDK_INT >=
+                                        android.os.Build.VERSION_CODES.TIRAMISU
+                        ) {
+                                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                                fetchAndShowNotification()
+                        }
+                }
+        }
 
         // 팝업 순서 제어: InitialPull1MonthDataPopup -> DailyInsightPopup
         var showInitialPopup by remember { mutableStateOf(true) }
