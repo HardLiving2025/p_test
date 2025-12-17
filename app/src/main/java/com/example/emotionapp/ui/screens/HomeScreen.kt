@@ -10,8 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.emotionapp.ui.components.DailyInsightPopup
@@ -35,7 +36,6 @@ enum class HomeTab {
         ANALYSIS,
         PREDICTION,
         NOTIFICATION,
-        SETTINGS
 }
 
 /** 기간 종류 */
@@ -50,7 +50,7 @@ enum class Period {
 data class BottomTab(val id: HomeTab, val label: String, val icon: ImageVector)
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onLogout: () -> Unit = {}) {
         var activeTab by remember { mutableStateOf(HomeTab.ANALYSIS) }
         var selectedPeriod by remember { mutableStateOf(Period.YESTERDAY) }
 
@@ -63,10 +63,7 @@ fun HomeScreen() {
                         BottomTab(HomeTab.ANALYSIS, "분석", Icons.Filled.BarChart),
                         BottomTab(HomeTab.PREDICTION, "예측", Icons.Filled.ShowChart),
                         BottomTab(HomeTab.NOTIFICATION, "알림", Icons.Filled.Notifications),
-                        BottomTab(HomeTab.SETTINGS, "설정", Icons.Filled.Settings)
                 )
-
-        val showPeriodSelector = activeTab != HomeTab.SETTINGS
 
         // 데이터 리프레시 트리거 (버전)
         var refreshTrigger by remember { mutableStateOf(0) }
@@ -87,12 +84,14 @@ fun HomeScreen() {
                 Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                         Column(modifier = Modifier.fillMaxSize()) {
                                 // 상단 기간 선택
-                                if (showPeriodSelector) {
-                                        PeriodSelector(
-                                                selectedPeriod = selectedPeriod,
-                                                onPeriodSelected = { selectedPeriod = it }
-                                        )
-                                }
+                                PeriodSelector(
+                                        selectedPeriod = selectedPeriod,
+                                        onPeriodSelected = { selectedPeriod = it },
+                                        isEnabled =
+                                                activeTab != HomeTab.PREDICTION &&
+                                                        activeTab != HomeTab.NOTIFICATION,
+                                        onLogout = onLogout
+                                )
 
                                 // 콘텐츠 영역
                                 Box(
@@ -111,7 +110,6 @@ fun HomeScreen() {
                                                         PredictionTab(period = selectedPeriod)
                                                 HomeTab.NOTIFICATION ->
                                                         NotificationTab(period = selectedPeriod)
-                                                HomeTab.SETTINGS -> SettingsTab()
                                         }
                                 }
                         }
@@ -134,7 +132,12 @@ fun HomeScreen() {
 
 /** 상단 기간 선택 컴포넌트 */
 @Composable
-private fun PeriodSelector(selectedPeriod: Period, onPeriodSelected: (Period) -> Unit) {
+private fun PeriodSelector(
+        selectedPeriod: Period,
+        onPeriodSelected: (Period) -> Unit,
+        isEnabled: Boolean,
+        onLogout: () -> Unit
+) {
         val periods =
                 listOf(
                         Period.YESTERDAY to "어제",
@@ -143,6 +146,8 @@ private fun PeriodSelector(selectedPeriod: Period, onPeriodSelected: (Period) ->
                         Period.MONTH to "한달"
                 )
 
+        var showMenu by remember { mutableStateOf(false) }
+
         Box(
                 modifier =
                         Modifier.fillMaxWidth()
@@ -150,30 +155,75 @@ private fun PeriodSelector(selectedPeriod: Period, onPeriodSelected: (Period) ->
                                 .padding(horizontal = Spacing.ScreenPadding, vertical = Spacing.M)
         ) {
                 Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.ItemGap)
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                 ) {
-                        periods.forEach { (id, label) ->
-                                val isSelected = selectedPeriod == id
-                                Button(
-                                        onClick = { onPeriodSelected(id) },
-                                        colors =
-                                                ButtonDefaults.buttonColors(
-                                                        containerColor =
-                                                                if (isSelected) AccentBlue
-                                                                else BackgroundBeige
-                                                ),
-                                        contentPadding =
-                                                PaddingValues(
-                                                        horizontal = Spacing.L,
-                                                        vertical = Spacing.S
-                                                ),
-                                        shape = RoundedCornerShape(Spacing.M)
+                        Row(
+                                modifier =
+                                        Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.ItemGap)
+                        ) {
+                                periods.forEach { (id, label) ->
+                                        val isSelected = selectedPeriod == id
+                                        Button(
+                                                onClick = { if (isEnabled) onPeriodSelected(id) },
+                                                enabled = isEnabled,
+                                                colors =
+                                                        ButtonDefaults.buttonColors(
+                                                                containerColor =
+                                                                        if (isSelected) AccentBlue
+                                                                        else BackgroundBeige,
+                                                                disabledContainerColor =
+                                                                        if (isSelected) AccentBlue
+                                                                        else BackgroundBeige,
+                                                                disabledContentColor = PrimaryBrown
+                                                        ),
+                                                contentPadding =
+                                                        PaddingValues(
+                                                                horizontal = Spacing.L,
+                                                                vertical = Spacing.S
+                                                        ),
+                                                modifier =
+                                                        Modifier.alpha(if (isEnabled) 1f else 0.5f),
+                                                shape = RoundedCornerShape(Spacing.M)
+                                        ) {
+                                                Text(
+                                                        text = label,
+                                                        color = PrimaryBrown,
+                                                        fontSize = FontSizes.Normal,
+                                                )
+                                        }
+                                }
+                        }
+
+                        // 더보기 버튼 및 드롭다운 메뉴
+                        Box {
+                                androidx.compose.material3.IconButton(
+                                        onClick = { showMenu = true }
                                 ) {
-                                        Text(
-                                                text = label,
-                                                color = PrimaryBrown,
-                                                fontSize = FontSizes.Normal,
+                                        Icon(
+                                                imageVector = Icons.Filled.MoreVert,
+                                                contentDescription = "More",
+                                                tint = PrimaryBrown
+                                        )
+                                }
+                                androidx.compose.material3.DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false },
+                                        modifier = Modifier.background(SurfaceWhite)
+                                ) {
+                                        androidx.compose.material3.DropdownMenuItem(
+                                                text = {
+                                                        Text(
+                                                                text = "🚪 로그아웃",
+                                                                fontSize = FontSizes.Normal,
+                                                                color = PrimaryBrown
+                                                        )
+                                                },
+                                                onClick = {
+                                                        showMenu = false
+                                                        onLogout()
+                                                }
                                         )
                                 }
                         }

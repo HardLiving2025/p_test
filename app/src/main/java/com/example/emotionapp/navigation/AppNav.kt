@@ -48,6 +48,23 @@ fun AppNav() {
             )
         }
 
-        composable("home") { HomeScreen() }
+        composable("home") {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val tokenManager = com.example.emotionapp.data.local.TokenManager(context)
+
+            HomeScreen(
+                    onLogout = {
+                        tokenManager.clearTokens()
+                        navController.navigate("login") {
+                            popUpTo("home") { inclusive = true }
+                            popUpTo("login") { inclusive = true }
+                            // 완전히 앱 초기 상태로 돌아가려면 popUpTo(0) 또는 그래프 시작점
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                        // 네비게이션을 login으로 하고, 백스택을 정리
+                        navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                    }
+            )
+        }
     }
 }
